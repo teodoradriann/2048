@@ -266,6 +266,7 @@ void initTable(int table[4][4]){
     voi da skip si voi alege altii
     */
     int cntr = 0;
+    srand(time(NULL));
     while (cntr != 2) {
         int x = rand() % 4;
         int y = rand() % 4;
