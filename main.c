@@ -9,33 +9,41 @@ char* timestr(struct tm *t, char* time){
     sprintf(time, "%02d-%02d-%04d %02d:%02d:%02d", t->tm_mday, t->tm_mon + 1, t->tm_year + 1900, t->tm_hour, t->tm_min, t->tm_sec);
     return time;
 }
-//calculez pozitia ????
 int calculatePos(int height, int width){
     return (height - width) / 2;
 }
 //desenez mascota vorbareata a jocului
 void drawMascot(){
+    char greetings[5][51] = {"  hey there bud! let's play!", "what a nice day to play 2048", 
+    "          sup buddy?       ", " howdy partner! let's play! ", "  aye fam wanna play innit"};
+    /* selectez ecranul principal 
+    si deschid fisierul unde se afla desenul cu mascota
+    */
     touchwin(stdscr);
-    FILE *file = fopen("asciiArt.txt", "r");
+    FILE *file = fopen("mascot.txt", "r");
     if (file == NULL){
         printf("Error in opening the specified file.\n");
         endwin();
         return;
     }
-
+    
     int y = 1; 
     int x = 2;
     int c;
     
-    while ((c = fgetc(file)) != EOF) { // Read characters from the file until EOF
-        mvaddch(y, x, c); // Print each character
+    while ((c = fgetc(file)) != EOF) {
+        mvaddch(y, x, c);
         x++;
-        if (c == '\n') { // If the character is a newline, move to the next row
+        //daca linia e un newline, trec la urmatorul rand
+        if (c == '\n') { 
             y++;
-            x = 2; // Reset the column
+            x = 2; //resetez coloana
         }
     }
     fclose(file);
+    srand(time(NULL));
+    int i = rand() % 5;
+    mvwprintw(stdscr, 2, 3, greetings[i]);
     refresh();
 }
 //afisez meniul jocului
@@ -47,6 +55,10 @@ void setupScreen(int height, int width, char* title, char *ng, char *res, char *
     
     drawMascot();
 
+    /*desenez meniul jocului la jumatatea ecranului si centrez fiecare cuvant
+    in functie de lungimea ecranului si dimenasiunea textului, apoi adaug * in dreptul
+    fiecarei optiuni atat in stanga cat si in dreapta
+    */
     mvaddstr(height / 2 - 3, calculatePos(width, strlen(title)), title);
 	mvaddstr(height / 2 - 2, calculatePos(width, strlen(ng)), ng);
 	mvaddstr(height / 2 - 1, calculatePos(width, strlen(res)), res);
@@ -126,14 +138,16 @@ void drawTable(WINDOW *window, int table[4][4]){
     init_pair(9, COLOR_MAGENTA, COLOR_WHITE);
     init_pair(10, COLOR_YELLOW, COLOR_WHITE);
     init_pair(11, COLOR_GREEN, COLOR_WHITE);
-    int height, width;
+    int height;
+    int width;
+    int i;
     getmaxyx(window, height, width);
     int squareSize = width / 6;
     int y = (height / 2) - (squareSize / 2); 
     int x = (width / 2) - (squareSize * 2); 
 
     // desenez liile exterioare are patratului
-    for (int i = 0; i < squareSize + 1; i++) {
+    for (i = 0; i < squareSize + 1; i++) {
         mvwaddch(window, y + i, x, ACS_VLINE);
         mvwaddch(window, y + i, x + squareSize * 4, ACS_VLINE);
     }
@@ -207,10 +221,11 @@ void moveCell(int table[4][4]){
     }
 }
 
-void continueGame(WINDOW* game, int *score, int table[4][4]){
-    touchwin(game); //merg in fereastra de joc
-    wrefresh(game); //dau un refresh la fereastra
-    drawTable(game, table); //redesenez tabelul pentru a nu pierde culorile celulelor
+void continueGame(WINDOW* gameWindow, int *score, int table[4][4]){
+    touchwin(gameWindow); //merg in fereastra de joc
+    wrefresh(gameWindow); //dau un refresh la fereastra
+    drawTable(gameWindow, table); //redesenez tabelul pentru a nu pierde culorile celulelor
+    wrefresh(gameWindow);
     moveCell(table);
 }
 
@@ -238,8 +253,10 @@ WINDOW* NewGame(int height, int width, int *score, int table[4][4]){
 
 void initTable(int table[4][4]){
     //initializez toate valorile matricei cu 0 pentru un fresh start
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
+    int i;
+    int j;
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
             table[i][j] = 0;
         }
     }
@@ -271,6 +288,10 @@ int main() {
     int* score = NULL;
     int table[4][4] = {0};
     char t[20];
+    char messages[5][51] = {"let's play again ASAP!", "where are you going? :(", 
+    "hey bud! shall we continue?", "come on bud.. one more!", "arghrhgrhgrrhgrghrrghr"};
+    int k;
+    srand(time(NULL));
 
     WINDOW* mainWindow = initscr(); //initializez fereastra de joc
     getmaxyx(mainWindow, height, width);
@@ -297,6 +318,10 @@ int main() {
             initTable(table);
             gameWindow = NewGame(height, width, score, table);
             setupScreen(height, width, title, ng, res, q);
+            for (k = 3; k < 31; k++)
+                mvaddch(2, k, ' ');
+            k = rand() % 5;
+            mvaddstr(2, 3, messages[k]);
             break;
         /* daca Resume e selectat, verific daca am deja un joc inceput
         daca acesta e inceput il voi continua si voi updata data si ora
@@ -309,6 +334,10 @@ int main() {
                 struct tm *rawtime = localtime(&now);
                 mvwprintw(gameWindow, height - 4, (width / 2) - 9.5, "%s", timestr(rawtime, t));
                 setupScreen(height, width, title, ng, res, q);
+                for (k = 3; k < 31; k++)
+                mvaddch(2, k, ' ');
+                k = rand() % 5;
+                mvaddstr(2, 3, messages[k]);
                 break;
             } else {
                 setupScreen(height, width, title, ng, res, q);
