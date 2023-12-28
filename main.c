@@ -107,9 +107,6 @@ int selectOption(int height, int width, char* title, char *ng, char *res, char *
         }
         refresh(); // Refresh the screen to show the new position
     }
-    if (c == 'q'){
-        return 3;
-    }
     return 0;
 }
 
@@ -173,19 +170,18 @@ int main(){
         switch(selectOption(height, width, title, ng, res, q)){
         case 1:
             gameWindow = NewGame(height, width, score);
-            setupScreen(height, width, title, ng, res, q);
+            mvaddstr(2, 3, " hey there bud'! let's play!  ");
+            refresh();
             break;
         case 2: 
             if (gameWindow != NULL){
+                if (gameWindow != NULL){
                 touchwin(gameWindow);
                 wrefresh(gameWindow);
+                }
             }
             else {
-                int msgLenght = strlen(" hey there bud! let's play!  ");
-                int i;
-                for (i = 0; i < msgLenght; i++)
-                    mvaddch(2, 3 + i, ' ');
-                mvaddstr(2, 3, " sorry bud, you can't resume");
+                mvaddstr(2, 3, " sorry bud', you can't resume");
                 refresh();
             }
             break;
