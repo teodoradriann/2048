@@ -4,6 +4,7 @@
 #include <time.h>
 #include <stdlib.h>
 #define star '*'
+#define FOREVER 1
 
 char* timestr(struct tm *t, char* time){
     sprintf(time, "%02d-%02d-%04d %02d:%02d:%02d", t->tm_mday, t->tm_mon + 1, t->tm_year + 1900, t->tm_hour, t->tm_min, t->tm_sec);
@@ -123,49 +124,30 @@ int selectOption(int height, int width, char* title, char *ng, char *res, char *
     }
     return 0;
 }
-//desenez tabelul jocului
-void drawTable(WINDOW *gameWindow, int table[4][4]){
-    //imi initialzez toate combinatiile de culori pentru fiecare celula
+
+void updateTable(WINDOW *gameWindow, int table[4][4]){
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_CYAN, COLOR_BLACK);
     init_pair(3, COLOR_YELLOW, COLOR_BLACK);
     init_pair(4, COLOR_GREEN, COLOR_BLACK);
     init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
     init_pair(6, COLOR_WHITE, COLOR_BLACK);
-
     init_pair(7, COLOR_BLACK, COLOR_WHITE);
     init_pair(8, COLOR_RED, COLOR_WHITE);
     init_pair(9, COLOR_MAGENTA, COLOR_WHITE);
     init_pair(10, COLOR_YELLOW, COLOR_WHITE);
     init_pair(11, COLOR_GREEN, COLOR_WHITE);
+    
     int height;
     int width;
-    int i;
     getmaxyx(gameWindow, height, width);
+    int i;
+    int j;
     int size = 16;
     int y = (height / 2) - (size / 2); 
     int x = (width / 2) - (size * 2); 
-
-    // desenez liile exterioare are patratului
-    for (i = 0; i < size + 1; i++) {
-        mvwaddch(gameWindow, y + i, x, '|');
-        mvwaddch(gameWindow, y + i, x + size * 4, '|');
-    }
-    mvwhline(gameWindow, y, x, '-', size * 4 + 1);
-    mvwhline(gameWindow, y + size, x, '-', size * 4 + 1);
-
-    // desenez celulele 
-    for (i = 1; i < 4; i++) {
-        mvwhline(gameWindow, y + i * size / 4, x + 0.5, '-', size * 4);
-        mvwvline(gameWindow, y, x + i * size, '|', size);
-    }
-    wattron(gameWindow, COLOR_PAIR(7));
-    mvwaddstr(gameWindow, height - 2, 2.33, " q - go back | w - move up | a - move left | s - move down | d - move right ");
-    wattroff(gameWindow, COLOR_PAIR(8));
-
-    // trec prin matrice si pun in celulele corespunzatoare tablei numerele colorate
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
             if (table[i][j] != 0) {
                 switch (table[i][j]){
                 case 2:
@@ -210,6 +192,37 @@ void drawTable(WINDOW *gameWindow, int table[4][4]){
             }
         }
     }
+    wrefresh(gameWindow);
+}
+//desenez tabelul jocului
+void drawTable(WINDOW *gameWindow, int table[4][4]){
+    //imi initialzez toate combinatiile de culori pentru fiecare celula
+    int height;
+    int width;
+    int i;
+    getmaxyx(gameWindow, height, width);
+    int size = 16;
+    int y = (height / 2) - (size / 2); 
+    int x = (width / 2) - (size * 2); 
+
+    // desenez liile exterioare are patratului
+    for (i = 0; i < size + 1; i++) {
+        mvwaddch(gameWindow, y + i, x, '|');
+        mvwaddch(gameWindow, y + i, x + size * 4, '|');
+    }
+    mvwhline(gameWindow, y, x, '-', size * 4 + 1);
+    mvwhline(gameWindow, y + size, x, '-', size * 4 + 1);
+
+    // desenez celulele 
+    for (i = 1; i < 4; i++) {
+        mvwhline(gameWindow, y + i * size / 4, x + 0.5, '-', size * 4);
+        mvwvline(gameWindow, y, x + i * size, '|', size);
+    }
+    wattron(gameWindow, COLOR_PAIR(7));
+    mvwaddstr(gameWindow, height - 2, 2.33, " q - go back | w - move up | a - move left | s - move down | d - move right ");
+    wattroff(gameWindow, COLOR_PAIR(8));
+
+    updateTable(gameWindow, table);
     wrefresh(gameWindow); // Refresh the window to show the table
 }
 
@@ -221,17 +234,20 @@ void moveCell(WINDOW* gameWindow, int table[4][4]){
         switch (c)
         {
         case 'w':
-            
-            drawTable(gameWindow, table);
+            mvwaddch(gameWindow, 10, 10, 'w');
+            updateTable(gameWindow, table);
             break;
         case 'a':
-            drawTable(gameWindow, table);
+            mvwaddch(gameWindow, 11, 11, 'a');
+            updateTable(gameWindow, table);
             break;
         case 's':
-            drawTable(gameWindow, table);
+            mvwaddch(gameWindow, 12, 12, 's');
+            updateTable(gameWindow, table);
             break;
         case 'd':
-            drawTable(gameWindow, table);
+            mvwaddch(gameWindow, 13, 13, 'd');
+            updateTable(gameWindow, table);
             break;
         default:
             break;
@@ -247,12 +263,14 @@ void moveCell(WINDOW* gameWindow, int table[4][4]){
 void continueGame(WINDOW* gameWindow, int *score, int table[4][4]){
     touchwin(gameWindow); //merg in fereastra de joc
     wrefresh(gameWindow); //dau un refresh la fereastra
-    drawTable(gameWindow, table); //redesenez tabelul pentru a nu pierde culorile celulelor
+    
+    updateTable(gameWindow, table); //redesenez celulele pentru a nu le pierde culoarea
     wrefresh(gameWindow);
+    
     moveCell(gameWindow, table);
 }
 
-WINDOW* NewGame(int height, int width, int *score, int table[4][4]){
+WINDOW* newGame(int height, int width, int *score, int table[4][4]){
     //initializez o noua fereastra de joc
     WINDOW *gameWindow = newwin(height, width, 0, 0);
     //obtin ora si data curente pentru afisare
@@ -317,7 +335,9 @@ int main() {
     int k;
     srand(time(NULL));
 
-    WINDOW* mainWindow = initscr(); //initializez fereastra de joc
+    WINDOW* mainWindow = initscr(); //initializez fereastra meniului principal
+    WINDOW* gameWindow = NULL; //initializez fereastra jocului
+    
     getmaxyx(mainWindow, height, width);
     clear(); /* Se șterge ecranul */
     noecho(); /* Se inhibă afișarea caracterelor introduse de la tastatură */
@@ -327,8 +347,8 @@ int main() {
 
     setupScreen(height, width, title, ng, res, q); //afisez ecranul de pornire
     
-    WINDOW* gameWindow = NULL; 
-    while (1) {
+    
+    while (FOREVER) {
         switch (selectOption(height, width, title, ng, res, q)) {
         /* daca a fost selectat New Game, verfic daca deja un joc e inceput
         si daca da, il sterg, altfel voi initializa o tabla de joc noua
@@ -340,7 +360,7 @@ int main() {
                 delwin(gameWindow);
             }
             initTable(table);
-            gameWindow = NewGame(height, width, score, table);
+            gameWindow = newGame(height, width, score, table);
             setupScreen(height, width, title, ng, res, q);
             for (k = 3; k < 31; k++)
                 mvaddch(2, k, ' ');
@@ -359,7 +379,7 @@ int main() {
                 mvwprintw(gameWindow, 3, (width / 2) - 9.5, "%s", timestr(rawtime, t));
                 setupScreen(height, width, title, ng, res, q);
                 for (k = 3; k < 31; k++)
-                mvaddch(2, k, ' ');
+                    mvaddch(2, k, ' ');
                 k = rand() % 5;
                 mvaddstr(2, 3, messages[k]);
                 break;
