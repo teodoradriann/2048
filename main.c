@@ -124,7 +124,7 @@ int selectOption(int height, int width, char* title, char *ng, char *res, char *
     return 0;
 }
 //desenez tabelul jocului
-void drawTable(WINDOW *window, int table[4][4]){
+void drawTable(WINDOW *gameWindow, int table[4][4]){
     //imi initialzez toate combinatiile de culori pentru fiecare celula
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_CYAN, COLOR_BLACK);
@@ -141,78 +141,101 @@ void drawTable(WINDOW *window, int table[4][4]){
     int height;
     int width;
     int i;
-    getmaxyx(window, height, width);
-    int squareSize = width / 6;
-    int y = (height / 2) - (squareSize / 2); 
-    int x = (width / 2) - (squareSize * 2); 
+    getmaxyx(gameWindow, height, width);
+    int size = 16;
+    int y = (height / 2) - (size / 2); 
+    int x = (width / 2) - (size * 2); 
 
     // desenez liile exterioare are patratului
-    for (i = 0; i < squareSize + 1; i++) {
-        mvwaddch(window, y + i, x, ACS_VLINE);
-        mvwaddch(window, y + i, x + squareSize * 4, ACS_VLINE);
+    for (i = 0; i < size + 1; i++) {
+        mvwaddch(gameWindow, y + i, x, '|');
+        mvwaddch(gameWindow, y + i, x + size * 4, '|');
     }
-    mvwhline(window, y, x, ACS_HLINE, squareSize * 4 + 1);
-    mvwhline(window, y + squareSize, x, ACS_HLINE, squareSize * 4 + 1);
+    mvwhline(gameWindow, y, x, '-', size * 4 + 1);
+    mvwhline(gameWindow, y + size, x, '-', size * 4 + 1);
 
     // desenez celulele 
-    for (int i = 1; i < 4; i++) {
-        mvwhline(window, y + i * squareSize / 4, x, ACS_HLINE, squareSize * 4);
-        mvwvline(window, y, x + i * squareSize, ACS_VLINE, squareSize);
+    for (i = 1; i < 4; i++) {
+        mvwhline(gameWindow, y + i * size / 4, x + 0.5, '-', size * 4);
+        mvwvline(gameWindow, y, x + i * size, '|', size);
     }
+    wattron(gameWindow, COLOR_PAIR(7));
+    mvwaddstr(gameWindow, height - 2, 2.33, " q - go back | w - move up | a - move left | s - move down | d - move right ");
+    wattroff(gameWindow, COLOR_PAIR(8));
+
     // trec prin matrice si pun in celulele corespunzatoare tablei numerele colorate
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (table[i][j] != 0) {
                 switch (table[i][j]){
                 case 2:
-                    wattron(window, COLOR_PAIR(1));
+                    wattron(gameWindow, COLOR_PAIR(1));
                     break;
                 case 4:
-                    wattron(window, COLOR_PAIR(2));
+                    wattron(gameWindow, COLOR_PAIR(2));
                     break;
                 case 8:
-                    wattron(window, COLOR_PAIR(3));
+                    wattron(gameWindow, COLOR_PAIR(3));
                     break;
                 case 16:
-                    wattron(window, COLOR_PAIR(4));
+                    wattron(gameWindow, COLOR_PAIR(4));
                     break;
                 case 32:
-                    wattron(window, COLOR_PAIR(5));
+                    wattron(gameWindow, COLOR_PAIR(5));
                     break;
                 case 64:
-                    wattron(window, COLOR_PAIR(6));
+                    wattron(gameWindow, COLOR_PAIR(6));
                     break;
                 case 128:
-                    wattron(window, COLOR_PAIR(7));
+                    wattron(gameWindow, COLOR_PAIR(7));
                     break;
                 case 256:
-                    wattron(window, COLOR_PAIR(8));
+                    wattron(gameWindow, COLOR_PAIR(8));
                     break;
                 case 512:
-                    wattron(window, COLOR_PAIR(9));
+                    wattron(gameWindow, COLOR_PAIR(9));
                     break;
                 case 1024:
-                    wattron(window, COLOR_PAIR(10));
+                    wattron(gameWindow, COLOR_PAIR(10));
                     break;
                 case 2048:
-                    wattron(window, COLOR_PAIR(11));
+                    wattron(gameWindow, COLOR_PAIR(11));
                     break;
                 default:
-                    wattroff(window, A_COLOR);
+                    wattroff(gameWindow, A_COLOR);
                     break;
                 }
-                mvwprintw(window, (y + i * squareSize / 4) + 1, x + j * squareSize + 7, "%d", table[i][j]);
-                wattroff(window, A_COLOR); // Turn off color after printing each number
+                mvwprintw(gameWindow, (y + i * size / 4) + 2, x + j * size + 8, "%d", table[i][j]);
+                wattroff(gameWindow, A_COLOR); // Turn off color after printing each number
             }
         }
     }
-    wrefresh(window); // Refresh the window to show the table
+    wrefresh(gameWindow); // Refresh the window to show the table
 }
 
-void moveCell(int table[4][4]){
+void moveCell(WINDOW* gameWindow, int table[4][4]){
     int c;
+    int i;
+    int j;
     while ((c = getch()) != 'q'){
-        //do stuff
+        switch (c)
+        {
+        case 'w':
+            
+            drawTable(gameWindow, table);
+            break;
+        case 'a':
+            drawTable(gameWindow, table);
+            break;
+        case 's':
+            drawTable(gameWindow, table);
+            break;
+        case 'd':
+            drawTable(gameWindow, table);
+            break;
+        default:
+            break;
+        }
     }
     if (tolower(c) == 'q'){
         //merg in fereastra principala si ii dau refresh
@@ -226,7 +249,7 @@ void continueGame(WINDOW* gameWindow, int *score, int table[4][4]){
     wrefresh(gameWindow); //dau un refresh la fereastra
     drawTable(gameWindow, table); //redesenez tabelul pentru a nu pierde culorile celulelor
     wrefresh(gameWindow);
-    moveCell(table);
+    moveCell(gameWindow, table);
 }
 
 WINDOW* NewGame(int height, int width, int *score, int table[4][4]){
@@ -239,15 +262,15 @@ WINDOW* NewGame(int height, int width, int *score, int table[4][4]){
     //desenez un contur cu linie alba
     box(gameWindow, 0, 0); 
     //control panel-ul
-    mvwprintw(gameWindow, 1, width / 2 - 2, "2048"); // Print a message in the new window
+    mvwprintw(gameWindow, 1, width / 2 - 2, "2048");
     mvwprintw(gameWindow, 2, (width / 2) - strlen("2048") / 2 - 2, "Score: %d", score);
-    mvwprintw(gameWindow, height - 4, (width / 2) - 9.5, "%s", timestr(rawtime, t));
+    mvwprintw(gameWindow, 3, (width / 2) - 9.5, "%s", timestr(rawtime, t));
     
     //desenez tabla de joc
     drawTable(gameWindow, table);
     wrefresh(gameWindow);
     
-    moveCell(table);
+    moveCell(gameWindow, table);
     return gameWindow;
 }
 
@@ -282,7 +305,7 @@ void initTable(int table[4][4]){
 int main() {
     int width;
     int height;
-    char* title = "2048 made by Adrian";
+    char* title = "2048";
     char* ng = "New Game";
     char* res = "Resume";
     char* q = "Quit";
@@ -333,7 +356,7 @@ int main() {
                 continueGame(gameWindow, score, table);
                 time_t now = time(NULL);
                 struct tm *rawtime = localtime(&now);
-                mvwprintw(gameWindow, height - 4, (width / 2) - 9.5, "%s", timestr(rawtime, t));
+                mvwprintw(gameWindow, 3, (width / 2) - 9.5, "%s", timestr(rawtime, t));
                 setupScreen(height, width, title, ng, res, q);
                 for (k = 3; k < 31; k++)
                 mvaddch(2, k, ' ');
