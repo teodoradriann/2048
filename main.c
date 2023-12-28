@@ -1,6 +1,6 @@
 #include <string.h>
 #include <ctype.h>
-#include <curses.h>
+#include <ncurses.h>
 #include <time.h>
 #include <stdlib.h>
 #define star '*'
@@ -13,6 +13,7 @@ char* timestr(struct tm *t, char* time){
 int calculatePos(int height, int width){
     return (height - width) / 2;
 }
+//desenez mascota vorbareata a jocului
 void drawMascot(){
     touchwin(stdscr);
     FILE *file = fopen("asciiArt.txt", "r");
@@ -110,15 +111,28 @@ int selectOption(int height, int width, char* title, char *ng, char *res, char *
     }
     return 0;
 }
-
+//desenez tabelul jocului
 void drawTable(WINDOW *window, int table[4][4]){
+    //imi initialzez toate combinatiile de culori pentru fiecare celula
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(2, COLOR_CYAN, COLOR_BLACK);
+    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(4, COLOR_GREEN, COLOR_BLACK);
+    init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(6, COLOR_WHITE, COLOR_BLACK);
+
+    init_pair(7, COLOR_BLACK, COLOR_WHITE);
+    init_pair(8, COLOR_RED, COLOR_WHITE);
+    init_pair(9, COLOR_MAGENTA, COLOR_WHITE);
+    init_pair(10, COLOR_YELLOW, COLOR_WHITE);
+    init_pair(11, COLOR_GREEN, COLOR_WHITE);
     int height, width;
     getmaxyx(window, height, width);
-    int squareSize = width / 6; // Size of the square based on the width of the window
-    int y = (height / 2) - (squareSize / 2); // Start drawing the table in the middle of the window
-    int x = (width / 2) - (squareSize * 2); // Center the table horizontally
+    int squareSize = width / 6;
+    int y = (height / 2) - (squareSize / 2); 
+    int x = (width / 2) - (squareSize * 2); 
 
-    // Draw the outer square
+    // desenez liile exterioare are patratului
     for (int i = 0; i < squareSize + 1; i++) {
         mvwaddch(window, y + i, x, ACS_VLINE);
         mvwaddch(window, y + i, x + squareSize * 4, ACS_VLINE);
@@ -126,73 +140,124 @@ void drawTable(WINDOW *window, int table[4][4]){
     mvwhline(window, y, x, ACS_HLINE, squareSize * 4 + 1);
     mvwhline(window, y + squareSize, x, ACS_HLINE, squareSize * 4 + 1);
 
-    // Draw the inner lines
+    // desenez celulele 
     for (int i = 1; i < 4; i++) {
         mvwhline(window, y + i * squareSize / 4, x, ACS_HLINE, squareSize * 4);
         mvwvline(window, y, x + i * squareSize, ACS_VLINE, squareSize);
     }
-
-    // Draw the values of the matrix
+    // trec prin matrice si pun in celulele corespunzatoare tablei numerele colorate
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (table[i][j] != 0) {
-                mvwprintw(window, y + i * squareSize / 4 + 1, x + j * squareSize + 1, "%d", table[i][j]);
+                switch (table[i][j]){
+                case 2:
+                    wattron(window, COLOR_PAIR(1));
+                    break;
+                case 4:
+                    wattron(window, COLOR_PAIR(2));
+                    break;
+                case 8:
+                    wattron(window, COLOR_PAIR(3));
+                    break;
+                case 16:
+                    wattron(window, COLOR_PAIR(4));
+                    break;
+                case 32:
+                    wattron(window, COLOR_PAIR(5));
+                    break;
+                case 64:
+                    wattron(window, COLOR_PAIR(6));
+                    break;
+                case 128:
+                    wattron(window, COLOR_PAIR(7));
+                    break;
+                case 256:
+                    wattron(window, COLOR_PAIR(8));
+                    break;
+                case 512:
+                    wattron(window, COLOR_PAIR(9));
+                    break;
+                case 1024:
+                    wattron(window, COLOR_PAIR(10));
+                    break;
+                case 2048:
+                    wattron(window, COLOR_PAIR(11));
+                    break;
+                default:
+                    wattroff(window, A_COLOR);
+                    break;
+                }
+                mvwprintw(window, (y + i * squareSize / 4) + 1, x + j * squareSize + 7, "%d", table[i][j]);
+                wattroff(window, A_COLOR); // Turn off color after printing each number
             }
         }
     }
-
     wrefresh(window); // Refresh the window to show the table
 }
 
-void continueGame(WINDOW* game, int *score){
-    touchwin(game);
-    wrefresh(game);
+void moveCell(int table[4][4]){
     int c;
     while ((c = getch()) != 'q'){
         //do stuff
     }
-    
     if (tolower(c) == 'q'){
+        //merg in fereastra principala si ii dau refresh
         touchwin(stdscr);
         wrefresh(stdscr);
     }
 }
 
+void continueGame(WINDOW* game, int *score, int table[4][4]){
+    touchwin(game); //merg in fereastra de joc
+    wrefresh(game); //dau un refresh la fereastra
+    drawTable(game, table); //redesenez tabelul pentru a nu pierde culorile celulelor
+    moveCell(table);
+}
+
 WINDOW* NewGame(int height, int width, int *score, int table[4][4]){
-    WINDOW *gameWindow = newwin(24, 80, 0, 0);
+    //initializez o noua fereastra de joc
+    WINDOW *gameWindow = newwin(height, width, 0, 0);
+    //obtin ora si data curente pentru afisare
     char t[20];
-    int c;
     time_t now = time(NULL);
     struct tm *rawtime = localtime(&now);
-    //printf("%s\n", timestr(rawtime, t));
-    box(gameWindow, 0, 0); // Draw a box around the window
+    //desenez un contur cu linie alba
+    box(gameWindow, 0, 0); 
+    //control panel-ul
     mvwprintw(gameWindow, 1, width / 2 - 2, "2048"); // Print a message in the new window
     mvwprintw(gameWindow, 2, (width / 2) - strlen("2048") / 2 - 2, "Score: %d", score);
-    drawTable(gameWindow, table);
-    wrefresh(gameWindow); // Refresh the window
-
-    while ((c = getch()) != 'q'){
-        //do stuff
-    }
+    mvwprintw(gameWindow, height - 4, (width / 2) - 9.5, "%s", timestr(rawtime, t));
     
-    if (tolower(c) == 'q'){
-        touchwin(stdscr);
-        wrefresh(stdscr);
-    }
+    //desenez tabla de joc
+    drawTable(gameWindow, table);
+    wrefresh(gameWindow);
+    
+    moveCell(table);
     return gameWindow;
 }
 
 void initTable(int table[4][4]){
+    //initializez toate valorile matricei cu 0 pentru un fresh start
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             table[i][j] = 0;
         }
     }
-    int i;
-    for (i = 0; i < 2; i++) {
+    /*
+    voi alege random 2 indexuri in care voi pune o valoare random dintre 2
+    si 4 si verific daca nu cumva indexii sunt egali pentru ca daca da
+    voi da skip si voi alege altii
+    */
+    int cntr = 0;
+    while (cntr != 2) {
         int x = rand() % 4;
         int y = rand() % 4;
-        table[x][y] = (rand() % 2 + 1) * 2;
+        if (x != y){
+            table[x][y] = (rand() % 2 + 1) * 2;
+            cntr++;
+        }
+        else
+            continue;
     }
 }
 
@@ -205,39 +270,57 @@ int main() {
     char* q = "Quit";
     int* score = NULL;
     int table[4][4] = {0};
+    char t[20];
 
     WINDOW* mainWindow = initscr(); //initializez fereastra de joc
     getmaxyx(mainWindow, height, width);
-    clear(); //sterg ecranul
-    noecho();
-    cbreak();
-    curs_set(FALSE);
-    keypad(stdscr, TRUE);
+    clear(); /* Se șterge ecranul */
+    noecho(); /* Se inhibă afișarea caracterelor introduse de la tastatură */
+    cbreak(); /* Caracterele introduse sunt citite imediat - fără 'buffering' */
+    curs_set(FALSE); /* Se ascunde cursorul */	
+    keypad(stdscr, TRUE); //dau enable la keypad, adica tastele mai speciale
 
-    setupScreen(height, width, title, ng, res, q);
-    WINDOW* gameWindow = NULL;
+    setupScreen(height, width, title, ng, res, q); //afisez ecranul de pornire
+    
+    WINDOW* gameWindow = NULL; 
     while (1) {
         switch (selectOption(height, width, title, ng, res, q)) {
+        /* daca a fost selectat New Game, verfic daca deja un joc e inceput
+        si daca da, il sterg, altfel voi initializa o tabla de joc noua
+        si voi porni jocul, ca mai apoi sa imi redesenez tabla de joc
+        pentru cand voi iesi din fereastra noua creata 
+        */
         case 1:
             if (gameWindow != NULL){
                 delwin(gameWindow);
             }
             initTable(table);
             gameWindow = NewGame(height, width, score, table);
-            mvaddstr(2, 3, " hey there bud! let's play!  ");
+            setupScreen(height, width, title, ng, res, q);
             break;
+        /* daca Resume e selectat, verific daca am deja un joc inceput
+        daca acesta e inceput il voi continua si voi updata data si ora
+        daca nu, transmit un mesaj mascotei
+        */
         case 2:
             if (gameWindow != NULL) {
-                continueGame(gameWindow, score);
+                continueGame(gameWindow, score, table);
+                time_t now = time(NULL);
+                struct tm *rawtime = localtime(&now);
+                mvwprintw(gameWindow, height - 4, (width / 2) - 9.5, "%s", timestr(rawtime, t));
+                setupScreen(height, width, title, ng, res, q);
                 break;
             } else {
+                setupScreen(height, width, title, ng, res, q);
                 mvaddstr(2, 3, " sorry bud, you can't resume ");
-                refresh();
                 break;
             }
+        /*
+        pentru quit inchid orice fereastra e deschisa si ies din program
+        */
         case 3:
             if (gameWindow != NULL) {
-                delwin(gameWindow); // Delete the game window if it exists
+                delwin(gameWindow);
             }
             endwin();
             return 0;
