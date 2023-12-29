@@ -10,6 +10,7 @@ char* timestr(struct tm *t, char* time){
     sprintf(time, "%02d-%02d-%04d %02d:%02d:%02d", t->tm_mday, t->tm_mon + 1, t->tm_year + 1900, t->tm_hour, t->tm_min, t->tm_sec);
     return time;
 }
+
 int calculatePos(int height, int width){
     return (height - width) / 2;
 }
@@ -48,8 +49,11 @@ void drawMascot(){
     refresh();
 }
 //afisez meniul jocului
-void setupScreen(int height, int width, char* title, char *ng, char *res, char *q){
+void setupScreen(char* title, char *ng, char *res, char *q){
     //setez culoarea backroundului
+    int height;
+    int width;
+    getmaxyx(stdscr, height, width);
     start_color();
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
     attron(COLOR_PAIR(1));
@@ -70,7 +74,10 @@ void setupScreen(int height, int width, char* title, char *ng, char *res, char *
     attroff(COLOR_PAIR(1));
 }
 //selectez o optiune si returnez valoarea selectata
-int selectOption(int height, int width, char* title, char *ng, char *res, char *q){
+int selectOption(char* title, char *ng, char *res, char *q){
+    int height;
+    int width;
+    getmaxyx(stdscr, height, width);
     int option = 1;
     int row = height / 2 - 2;
     int c;
@@ -125,7 +132,7 @@ int selectOption(int height, int width, char* title, char *ng, char *res, char *
     return 0;
 }
 
-void updateTable(WINDOW *gameWindow, int table[4][4]){
+void updateTable(WINDOW* gameWindow, int table[4][4]){
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_CYAN, COLOR_BLACK);
     init_pair(3, COLOR_YELLOW, COLOR_BLACK);
@@ -190,12 +197,15 @@ void updateTable(WINDOW *gameWindow, int table[4][4]){
                 mvwprintw(gameWindow, (y + i * size / 4) + 2, x + j * size + 8, "%d", table[i][j]);
                 wattroff(gameWindow, A_COLOR); // Turn off color after printing each number
             }
+            else {
+                mvwprintw(gameWindow, (y + i * size / 4) + 2, x + j * size + 1, "           ");
+            }
         }
     }
     wrefresh(gameWindow);
 }
 //desenez tabelul jocului
-void drawTable(WINDOW *gameWindow, int table[4][4]){
+void drawTable(WINDOW* gameWindow, int table[4][4]){
     //imi initialzez toate combinatiile de culori pentru fiecare celula
     int height;
     int width;
@@ -226,28 +236,230 @@ void drawTable(WINDOW *gameWindow, int table[4][4]){
     wrefresh(gameWindow); // Refresh the window to show the table
 }
 
-void moveCell(WINDOW* gameWindow, int table[4][4]){
+void addRandomNumber(int table[4][4]){
+    int cntr = 0;
+    srand(time(NULL));
+    while (cntr != 1) {
+        int x = rand() % 4;
+        int y = rand() % 4;
+        if (x != y && table[x][y] == 0){
+            table[x][y] = (rand() % 2 + 1) * 2;
+            cntr++;
+        }
+        else
+            continue;
+    }
+}
+
+void moveCell(WINDOW* gameWindow, int table[4][4], int *score){
     int c;
     int i;
     int j;
+    int k;
+    int p;
+    bool wMoved;
+    bool aMoved;
+    bool sMoved;
+    bool dMoved;
     while ((c = getch()) != 'q'){
         switch (c)
         {
         case 'w':
-            mvwaddch(gameWindow, 10, 10, 'w');
-            updateTable(gameWindow, table);
+            wMoved = false;
+            for (i = 0; i < 4; i++){
+                for (j = 0; j < 4; j++){
+                    if (table[i][j] == 0){
+                        for (k = i + 1; k < 4; k++){
+                            if (table[k][j] != 0) {
+                                for (p = k + 1; p < 4; p++){
+                                    if (table[k][j] == table[p][j]){
+                                        table[k][j] += table[p][j];
+                                        *score += table[k][j]; // Add to score after merging
+                                        table[p][j] = 0;
+                                        wMoved = true;
+                                        break;
+                                    }
+                                }
+                                if (table[i][j] != table[k][j]) {
+                                    wMoved = true;
+                                }   
+                                table[i][j] = table[k][j];
+                                table[k][j] = 0;
+                                break;
+                            }
+                        }
+                    }
+                    else if (table[i][j] != 0){
+                        for (k = i + 1; k < 4; k++){
+                            if (table[i][j] == table[k][j]){
+                                table[i][j] += table[k][j];
+                                *score += table[i][j];
+                                table[k][j] = 0;
+                                wMoved = true;
+                                break;
+                            }
+                            else 
+                                break;
+                        }
+                    }
+                }
+            }
+            if (wMoved){
+                addRandomNumber(table);
+                updateTable(gameWindow, table);
+                mvwprintw(gameWindow, getmaxy(gameWindow) - 1, 2, "Score: %d", *score);
+                wrefresh(gameWindow);
+            }
             break;
         case 'a':
-            mvwaddch(gameWindow, 11, 11, 'a');
-            updateTable(gameWindow, table);
+            aMoved = false;
+            for (j = 0; j < 4; j++){
+                for (i = 0; i < 4; i++){
+                    if (table[j][i] == 0){
+                        for (k = i + 1; k < 4; k++){
+                            if (table[j][k] != 0) {
+                                for (p = k + 1; p < 4; p++){
+                                    if (table[j][k] == table[j][p]){
+                                        table[j][k] += table[j][p];
+                                        *score += table[j][k];
+                                        table[j][p] = 0;
+                                        aMoved = true;
+                                        break;
+                                    }
+                                }
+                                if (table[j][i] != table[j][k]) {
+                                    aMoved = true;
+                                }
+                                table[j][i] = table[j][k];
+                                table[j][k] = 0;
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        for (k = i + 1; k < 4; k++){
+                            if (table[j][k] != 0) {
+                                if (table[j][i] == table[j][k]){
+                                    table[j][i] += table[j][k];
+                                    *score += table[j][i];
+                                    table[j][k] = 0;
+                                    aMoved = true;
+                                    break;
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (aMoved){
+                addRandomNumber(table);
+                updateTable(gameWindow, table);
+                mvwprintw(gameWindow, getmaxy(gameWindow) - 1, 2, "Score: %d", *score);
+                wrefresh(gameWindow);
+            }
             break;
         case 's':
-            mvwaddch(gameWindow, 12, 12, 's');
-            updateTable(gameWindow, table);
+            sMoved = false;
+            for (i = 3; i >= 0; i--){
+                for (j = 0; j < 4; j++){
+                    if (table[i][j] == 0){
+                        for (k = i - 1; k >= 0; k--){
+                            if (table[k][j] != 0) {
+                                for (p = k - 1; p >= 0; p--){
+                                    if (table[k][j] == table[p][j]){
+                                        table[k][j] += table[p][j];
+                                        *score += table[k][j];
+                                        table[p][j] = 0;
+                                        sMoved = true;
+                                        break;
+                                    }
+                                }
+                                if (table[i][j] != table[k][j]) {
+                                    sMoved = true;
+                                }
+                                table[i][j] = table[k][j];
+                                table[k][j] = 0;
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        for (k = i - 1; k >= 0; k--){
+                            if (table[k][j] != 0) {
+                                if (table[i][j] == table[k][j]){
+                                    table[i][j] += table[k][j];
+                                    *score += table[i][j];
+                                    table[k][j] = 0;
+                                    sMoved = true;
+                                    break;
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (sMoved){
+                addRandomNumber(table);
+                updateTable(gameWindow, table);
+                mvwprintw(gameWindow, getmaxy(gameWindow) - 1, 2, "Score: %d", *score);
+                wrefresh(gameWindow);
+            }
             break;
         case 'd':
-            mvwaddch(gameWindow, 13, 13, 'd');
-            updateTable(gameWindow, table);
+            dMoved = false;
+            for (j = 3; j >= 0; j--){
+                for (i = 0; i < 4; i++){
+                    if (table[j][i] == 0){
+                        for (k = i - 1; k >= 0; k--){
+                            if (table[j][k] != 0) {
+                                for (p = k - 1; p >= 0; p--){
+                                    if (table[j][k] == table[j][p]){
+                                        table[j][k] += table[j][p];
+                                        *score += table[j][k];
+                                        table[j][p] = 0;
+                                        dMoved = true;
+                                        break;
+                                    }
+                                }
+                                if (table[j][i] != table[j][k]) {
+                                    dMoved = true;
+                                }
+                                table[j][i] = table[j][k];
+                                table[j][k] = 0;
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        for (k = i - 1; k >= 0; k--){
+                            if (table[j][k] != 0) {
+                                if (table[j][i] == table[j][k]){
+                                    table[j][i] += table[j][k];
+                                    *score += table[j][i];
+                                    table[j][k] = 0;
+                                    dMoved = true;
+                                    break;
+                                }
+                                else {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (dMoved){
+                addRandomNumber(table);
+                updateTable(gameWindow, table);
+                mvwprintw(gameWindow, getmaxy(gameWindow) - 1, 2, "Score: %d", *score);
+                wrefresh(gameWindow);
+            }
             break;
         default:
             break;
@@ -267,11 +479,14 @@ void continueGame(WINDOW* gameWindow, int *score, int table[4][4]){
     updateTable(gameWindow, table); //redesenez celulele pentru a nu le pierde culoarea
     wrefresh(gameWindow);
     
-    moveCell(gameWindow, table);
+    moveCell(gameWindow, table, score);
 }
 
-WINDOW* newGame(int height, int width, int *score, int table[4][4]){
+WINDOW* newGame(int *score, int table[4][4]){
     //initializez o noua fereastra de joc
+    int height;
+    int width;
+    getmaxyx(stdscr, height, width);
     WINDOW *gameWindow = newwin(height, width, 0, 0);
     //obtin ora si data curente pentru afisare
     char t[20];
@@ -281,14 +496,14 @@ WINDOW* newGame(int height, int width, int *score, int table[4][4]){
     box(gameWindow, 0, 0); 
     //control panel-ul
     mvwprintw(gameWindow, 1, width / 2 - 2, "2048");
-    mvwprintw(gameWindow, 2, (width / 2) - strlen("2048") / 2 - 2, "Score: %d", score);
+    mvwprintw(gameWindow, 2, (width / 2) - strlen("2048") / 2 - 2, "Score: %d", *score);
     mvwprintw(gameWindow, 3, (width / 2) - 9.5, "%s", timestr(rawtime, t));
     
     //desenez tabla de joc
     drawTable(gameWindow, table);
     wrefresh(gameWindow);
     
-    moveCell(gameWindow, table);
+    moveCell(gameWindow, table, score);
     return gameWindow;
 }
 
@@ -320,6 +535,10 @@ void initTable(int table[4][4]){
     }
 }
 
+void scoreAdd(int *score, int value){
+    *score += value;
+}
+
 int main() {
     int width;
     int height;
@@ -327,7 +546,8 @@ int main() {
     char* ng = "New Game";
     char* res = "Resume";
     char* q = "Quit";
-    int* score = NULL;
+    int *score = (int *)malloc(sizeof(int));
+    *score = 0;
     int table[4][4] = {0};
     char t[20];
     char messages[5][51] = {"let's play again ASAP!", "where are you going? :(", 
@@ -345,11 +565,11 @@ int main() {
     curs_set(FALSE); /* Se ascunde cursorul */	
     keypad(stdscr, TRUE); //dau enable la keypad, adica tastele mai speciale
 
-    setupScreen(height, width, title, ng, res, q); //afisez ecranul de pornire
+    setupScreen(title, ng, res, q); //afisez ecranul de pornire
     
     
     while (FOREVER) {
-        switch (selectOption(height, width, title, ng, res, q)) {
+        switch (selectOption(title, ng, res, q)) {
         /* daca a fost selectat New Game, verfic daca deja un joc e inceput
         si daca da, il sterg, altfel voi initializa o tabla de joc noua
         si voi porni jocul, ca mai apoi sa imi redesenez tabla de joc
@@ -360,8 +580,8 @@ int main() {
                 delwin(gameWindow);
             }
             initTable(table);
-            gameWindow = newGame(height, width, score, table);
-            setupScreen(height, width, title, ng, res, q);
+            gameWindow = newGame(score, table);
+            setupScreen(title, ng, res, q);
             for (k = 3; k < 31; k++)
                 mvaddch(2, k, ' ');
             k = rand() % 5;
@@ -377,14 +597,14 @@ int main() {
                 time_t now = time(NULL);
                 struct tm *rawtime = localtime(&now);
                 mvwprintw(gameWindow, 3, (width / 2) - 9.5, "%s", timestr(rawtime, t));
-                setupScreen(height, width, title, ng, res, q);
+                setupScreen(title, ng, res, q);
                 for (k = 3; k < 31; k++)
                     mvaddch(2, k, ' ');
                 k = rand() % 5;
                 mvaddstr(2, 3, messages[k]);
                 break;
             } else {
-                setupScreen(height, width, title, ng, res, q);
+                setupScreen(title, ng, res, q);
                 mvaddstr(2, 3, " sorry bud, you can't resume ");
                 break;
             }
