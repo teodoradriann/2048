@@ -566,7 +566,6 @@ void moveCell(WINDOW **gameWindow, int table[4][4], int *score) {
             mvwprintw(*gameWindow, height - 1,
                       (width / 2) - strlen("GAME OVER!") / 2, "GAME OVER!");
             wrefresh(*gameWindow);
-            getch();
             delwin(*gameWindow);
             *gameWindow = NULL;
         }
