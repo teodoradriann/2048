@@ -649,6 +649,9 @@ WINDOW *loadGame(int *score, int table[4][4]){
     }
     fscanf(saveFile, "%d", score); //citesc scorul
     getmaxyx(stdscr, height, width);
+    if (isGameOver(table)){
+        return NULL;
+    }
     WINDOW *gameWindow = NULL;
     gameWindow = newwin(height, width, 0, 0);
     // obtin ora si data curente pentru afisare
