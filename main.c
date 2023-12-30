@@ -713,10 +713,9 @@ int main() {
     *score = 0;
     int table[4][4] = {0};
     char t[20];
-    char messages[5][51] = {"let's play again ASAP!", "where are you going? :(",
+    char messages[4][51] = {"let's play again ASAP!", "where are you going? :(",
                             "hey bud! shall we continue?",
-                            "come on bud.. one more!",
-                            "arghrhgrhgrrhgrghrrghr"};
+                            "come on bud.. one more!"};
     int k;
     srand(time(NULL));
 
@@ -749,7 +748,7 @@ int main() {
                 mainScreen(title, ng, res, load, q);
                 // sterg mesajul curent si adaug un mesaj random mascotei
                 mvprintw(2, 3, "                             ");
-                k = rand() % 5;
+                k = rand() % 4;
                 mvaddstr(2, 3, messages[k]);
                 break;
             /* daca Resume e selectat, verific daca am deja un joc inceput
@@ -765,7 +764,7 @@ int main() {
                               timestr(rawtime, t));
                     mainScreen(title, ng, res, load, q);
                     mvprintw(2, 3, "                             ");
-                    k = rand() % 5;
+                    k = rand() % 4;
                     mvaddstr(2, 3, messages[k]);
                     break;
                 } else {
@@ -780,10 +779,16 @@ int main() {
                     break;
                 } else {
                     gameWindow = loadGame(score, table);
+                    if (gameWindow == NULL){
+                        mainScreen(title, ng, res, load, q);
+                        mvprintw(2, 3, "                             ");
+                        mvaddstr(2, 3, " the last game was over homie");
+                        break;
+                    }
                     mainScreen(title, ng, res, load, q);
                     // sterg mesajul curent si adaug un mesaj random mascotei
                     mvprintw(2, 3, "                             ");
-                    k = rand() % 5;
+                    k = rand() % 4;
                     mvaddstr(2, 3, messages[k]);
                     break;
                 }
