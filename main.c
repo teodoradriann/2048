@@ -30,15 +30,14 @@ void initTable(int table[4][4]) {
     resetTable(table);
     /*
     voi alege random 2 indexuri in care voi pune o valoare random dintre 2
-    si 4 si verific daca nu cumva indexii sunt egali pentru ca daca da
-    voi da skip si voi alege altii
+    si 4
     */
     int cntr = 0;
     srand(time(NULL));
     while (cntr != 2) {
         int x = rand() % 4;
         int y = rand() % 4;
-        if (x != y) {
+        if (table[x][y] == 0) {
             table[x][y] = (rand() % 2 + 1) * 2;
             cntr++;
         } else
@@ -82,7 +81,7 @@ void drawMascot() {
     refresh();
 }
 // afisez meniul jocului
-void setupScreen(char *title, char *ng, char *res, char *q) {
+void setupScreen(char *title, char *ng, char *res, char *load, char *q) {
     // setez culoarea backroundului
     int height;
     int width;
@@ -95,37 +94,41 @@ void setupScreen(char *title, char *ng, char *res, char *q) {
 
     /*desenez meniul jocului la jumatatea ecranului si centrez fiecare cuvant
     in functie de lungimea ecranului si dimenasiunea textului, apoi adaug * in
-    dreptul fiecarei optiuni atat in stanga cat si in dreapta
+    dreptul primei optiuni atat in stanga cat si in dreapta
     */
-    mvaddstr(height / 2 - 3, calculatePos(width, strlen(title)), title);
-    mvaddstr(height / 2 - 2, calculatePos(width, strlen(ng)), ng);
-    mvaddstr(height / 2 - 1, calculatePos(width, strlen(res)), res);
+    mvaddstr(height / 2 - 4, calculatePos(width, strlen(title)), title);
+    mvaddstr(height / 2 - 3, calculatePos(width, strlen(ng)), ng);
+    mvaddstr(height / 2 - 2, calculatePos(width, strlen(res)), res);
+    mvaddstr(height / 2 - 1, calculatePos(width, strlen(load)), load);
     mvaddstr(height / 2, calculatePos(width, strlen(q)), q);
-    mvaddch(height / 2 - 2, calculatePos(width, strlen(ng)) - 2, star);
-    mvaddch(height / 2 - 2, calculatePos(width, strlen(ng)) + strlen(ng) + 1,
+    mvaddch(height / 2 - 3, calculatePos(width, strlen(ng)) - 2, star);
+    mvaddch(height / 2 - 3, calculatePos(width, strlen(ng)) + strlen(ng) + 1,
             star);
     refresh();
     attroff(COLOR_PAIR(1));
 }
 // selectez o optiune si returnez valoarea selectata
-int selectOption(char *title, char *ng, char *res, char *q) {
+int selectOption(char *title, char *ng, char *res, char *load, char *q) {
     int height;
     int width;
     getmaxyx(stdscr, height, width);
     int option = 1;
-    int row = height / 2 - 2;
+    int row = height / 2 - 3;
     int c;
     while ((c = getch()) != 'q') {
         switch (c) {
             case KEY_UP:
-                if (row > height / 2 - 2) {
-                    if (row == height / 2 - 1) {
+                if (row > height / 2 - 3) {
+                    if (row == height / 2 - 2) {
                         mvaddch(row, calculatePos(width, strlen(res)) - 2, ' ');
-                        mvaddch(
-                            row,
-                            calculatePos(width, strlen(res)) + strlen(res) + 1,
+                        mvaddch(row, calculatePos(width, strlen(res)) + strlen(res) + 1,
                             ' ');
-                    } else if (row == height / 2) {
+                    } else if (row == height / 2 - 1){
+                        mvaddch(row, calculatePos(width, strlen(load)) - 2, ' ');
+                        mvaddch(row, calculatePos(width, strlen(load)) + strlen(load) + 1,
+                            ' ');
+                    }
+                    else if (row == height / 2) {
                         mvaddch(row, calculatePos(width, strlen(q)) - 2, ' ');
                         mvaddch(row,
                                 calculatePos(width, strlen(q)) + strlen(q) + 1,
@@ -137,17 +140,23 @@ int selectOption(char *title, char *ng, char *res, char *q) {
                 break;
             case KEY_DOWN:
                 if (row < height / 2) {
-                    if (row == height / 2 - 2) {
+                    if (row == height / 2 - 3) {
                         mvaddch(row, calculatePos(width, strlen(ng)) - 2, ' ');
                         mvaddch(
                             row,
                             calculatePos(width, strlen(ng)) + strlen(ng) + 1,
                             ' ');
-                    } else if (row == height / 2 - 1) {
+                    } else if (row == height / 2 - 2) {
                         mvaddch(row, calculatePos(width, strlen(res)) - 2, ' ');
                         mvaddch(
                             row,
                             calculatePos(width, strlen(res)) + strlen(res) + 1,
+                            ' ');
+                    } else if (row == height / 2 - 1) {
+                        mvaddch(row, calculatePos(width, strlen(load)) - 2, ' ');
+                        mvaddch(
+                            row,
+                            calculatePos(width, strlen(load)) + strlen(load) + 1,
                             ' ');
                     }
                     row++;  // Move down
@@ -158,13 +167,17 @@ int selectOption(char *title, char *ng, char *res, char *q) {
                 return option;
                 break;
         }
-        if (row == height / 2 - 2) {
+        if (row == height / 2 - 3) {
             mvaddch(row, calculatePos(width, strlen(ng)) - 2, star);
             mvaddch(row, calculatePos(width, strlen(ng)) + strlen(ng) + 1,
                     star);
-        } else if (row == height / 2 - 1) {
+        } else if (row == height / 2 - 2) {
             mvaddch(row, calculatePos(width, strlen(res)) - 2, star);
             mvaddch(row, calculatePos(width, strlen(res)) + strlen(res) + 1,
+                    star);
+        } else if (row == height / 2 - 1){
+            mvaddch(row, calculatePos(width, strlen(load)) - 2, star);
+            mvaddch(row, calculatePos(width, strlen(load)) + strlen(load) + 1,
                     star);
         } else if (row == height / 2) {
             mvaddch(row, calculatePos(width, strlen(q)) - 2, star);
@@ -199,6 +212,10 @@ void updateTable(WINDOW *gameWindow, int table[4][4]) {
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 4; j++) {
             if (table[i][j] != 0) {
+                //sterg casuta pentru a afisa noul numar
+                mvwprintw(gameWindow, (y + i * size / 4) + 2, x + j * size + 8,
+                            "    ");
+                // selectez culoarea pentru fiecare numar
                 switch (table[i][j]) {
                     case 2:
                         wattron(gameWindow, COLOR_PAIR(1));
@@ -237,13 +254,13 @@ void updateTable(WINDOW *gameWindow, int table[4][4]) {
                         wattroff(gameWindow, A_COLOR);
                         break;
                 }
+                //afisez noul numar
                 mvwprintw(gameWindow, (y + i * size / 4) + 2, x + j * size + 8,
                           "%d", table[i][j]);
-                wattroff(gameWindow,
-                         A_COLOR);  // Turn off color after printing each number
-            } else {
-                mvwprintw(gameWindow, (y + i * size / 4) + 2, x + j * size + 1,
-                          "           ");
+                wattroff(gameWindow, A_COLOR); //sterg culoarea
+             } else {
+                mvwprintw(gameWindow, (y + i * size / 4) + 2, x + j * size + 8,
+                          "    ");
             }
         }
     }
@@ -286,6 +303,7 @@ void drawTable(WINDOW *gameWindow, int table[4][4]) {
 void addRandomNumber(int table[4][4]) {
     int i;
     int j;
+    // verific cate celule sunt goale pentru a sti daca mai am loc pe tabla
     int emptyCells = 0;
     for (i = 0; i < 4; i++){
         for (j = 0; j < 4; j++){
@@ -295,6 +313,7 @@ void addRandomNumber(int table[4][4]) {
     }
     if (emptyCells == 0)
         return;
+    //daca mai am loc pe tabla aleg 2 indici random si pun 2 sau 4 in celula respectiva
     int cntr = 0;
     srand(time(NULL));
     while (cntr != 1) {
@@ -578,15 +597,76 @@ void moveCell(WINDOW **gameWindow, int table[4][4], int *score) {
 }
 
 void continueGame(WINDOW **gameWindow, int *score, int table[4][4]) {
+    /* daca fereastra nu e NULL inseamna ca am un joc in desfasurare pe care
+    pot sa il reiau, daca e NULL nu fac nimic
+    */
     if (*gameWindow == NULL){
         return;
     } else {
         touchwin(*gameWindow);  // merg in fereastra de joc
         wrefresh(*gameWindow);  // dau un refresh la fereastra
         updateTable(*gameWindow, table);  // redesenez celulele pentru a nu le pierde culoarea
-        wrefresh(*gameWindow);
-        moveCell(gameWindow, table, score);
+        wrefresh(*gameWindow); // dau un refresh
+        moveCell(gameWindow, table, score); // continui jocul
     }
+}
+
+void saveGame(int *score, int table[4][4]){
+    FILE* save = fopen("save.txt", "w");
+    if (save == NULL){
+        return;
+    }
+    int i;
+    int j;
+    for (i = 0; i < 4; i++){
+        for (j = 0; j < 4; j++){
+            fprintf(save, "%d ", table[i][j]);
+        }
+        fprintf(save, "\n");
+    }
+    fprintf(save, "%d\n", *score);
+    fclose(save);
+}
+
+WINDOW *loadGame(int *score, int table[4][4]){
+    // functia loadGame e practic la fel ca newGame doar ca citeste valorile
+    // salvate din fisier si initializeaza tabla de joc cu ele
+    // initializez o noua fereastra de joc
+    int height;
+    int width;
+    FILE *saveFile = fopen("save.txt", "r");
+    if (saveFile == NULL){
+        return NULL;
+    }
+    //citesc matricea din fisier
+    int i;
+    int j;
+    for (i = 0; i < 4; i++){
+        for (j = 0; j < 4; j++){
+            fscanf(saveFile, "%d", &table[i][j]);
+        }
+    }
+    fscanf(saveFile, "%d", score); //citesc scorul
+    getmaxyx(stdscr, height, width);
+    WINDOW *gameWindow = NULL;
+    gameWindow = newwin(height, width, 0, 0);
+    // obtin ora si data curente pentru afisare
+    char t[20];
+    time_t now = time(NULL);
+    struct tm *rawtime = localtime(&now);
+    // desenez un contur cu linie alba
+    box(gameWindow, 0, 0);
+    // control panel-ul
+    mvwprintw(gameWindow, 1, width / 2 - 2, "2048");
+    mvwprintw(gameWindow, 2, (width / 2) - strlen("2048") / 2 - 2, "Score: %d",
+              *score);
+    mvwprintw(gameWindow, 3, (width / 2) - 9.5, "%s", timestr(rawtime, t));
+    drawTable(gameWindow, table);
+    wrefresh(gameWindow);
+
+    // incep jocul
+    moveCell(&gameWindow, table, score);
+    return gameWindow;
 }
 
 WINDOW *newGame(int *score, int table[4][4]) {
@@ -613,16 +693,17 @@ WINDOW *newGame(int *score, int table[4][4]) {
     drawTable(gameWindow, table);
     wrefresh(gameWindow);
 
+    // incep jocul
     moveCell(&gameWindow, table, score);
     return gameWindow;
 }
 
 int main() {
     int width;
-    int height;
     char *title = "2048";
     char *ng = "New Game";
     char *res = "Resume";
+    char *load = "Load";
     char *q = "Quit";
     int *score = (int *)malloc(sizeof(int));
     *score = 0;
@@ -638,17 +719,17 @@ int main() {
     WINDOW *mainWindow = initscr();  // initializez fereastra meniului principal
     WINDOW *gameWindow = NULL;       // initializez fereastra jocului
 
-    getmaxyx(mainWindow, height, width);
+    width = getmaxx(mainWindow);
     clear();  /* Se șterge ecranul */
     noecho(); /* Se inhibă afișarea caracterelor introduse de la tastatură */
     cbreak(); /* Caracterele introduse sunt citite imediat - fără 'buffering' */
     curs_set(FALSE);       /* Se ascunde cursorul */
     keypad(stdscr, TRUE);  // dau enable la keypad, adica tastele mai speciale
 
-    setupScreen(title, ng, res, q);  // afisez ecranul de pornire
+    setupScreen(title, ng, res, load, q);  // afisez ecranul de pornire
 
     while (FOREVER) {
-        switch (selectOption(title, ng, res, q)) {
+        switch (selectOption(title, ng, res, load, q)) {
             /* daca a fost selectat New Game, verfic daca deja un joc e inceput
             si daca da, il sterg, altfel voi initializa o tabla de joc noua
             si voi porni jocul, ca mai apoi sa imi redesenez tabla de joc
@@ -661,8 +742,9 @@ int main() {
                 }
                 initTable(table);
                 gameWindow = newGame(score, table);
-                setupScreen(title, ng, res, q);
-                for (k = 3; k < 31; k++) mvaddch(2, k, ' ');
+                setupScreen(title, ng, res, load, q);
+                // sterg mesajul curent si adaug un mesaj random mascotei
+                mvprintw(2, 3, "                             ");
                 k = rand() % 5;
                 mvaddstr(2, 3, messages[k]);
                 break;
@@ -677,24 +759,39 @@ int main() {
                     struct tm *rawtime = localtime(&now);
                     mvwprintw(gameWindow, 3, (width / 2) - 9.5, "%s",
                               timestr(rawtime, t));
-                    setupScreen(title, ng, res, q);
-                    for (k = 3; k < 31; k++) mvaddch(2, k, ' ');
+                    setupScreen(title, ng, res, load, q);
+                    mvprintw(2, 3, "                             ");
                     k = rand() % 5;
                     mvaddstr(2, 3, messages[k]);
                     break;
                 } else {
-                    setupScreen(title, ng, res, q);
+                    setupScreen(title, ng, res, load, q);
                     mvaddstr(2, 3, " sorry bud, you can't resume ");
+                    break;
+                }
+            case 3:
+                if (gameWindow != NULL) {
+                    setupScreen(title, ng, res, load, q);
+                    mvaddstr(2, 3, "sorry bro you started a game");
+                    break;
+                } else {
+                    gameWindow = loadGame(score, table);
+                    setupScreen(title, ng, res, load, q);
+                    // sterg mesajul curent si adaug un mesaj random mascotei
+                    mvprintw(2, 3, "                             ");
+                    k = rand() % 5;
+                    mvaddstr(2, 3, messages[k]);
                     break;
                 }
             /*
             pentru quit inchid orice fereastra e deschisa si ies din program
             */
-            case 3:
+            case 4:
                 if (gameWindow != NULL) {
                     delwin(gameWindow);
                     gameWindow = NULL;
                 }
+                saveGame(score, table);
                 endwin();
                 return 0;
         }
