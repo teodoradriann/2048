@@ -45,7 +45,7 @@ void initTable(int table[4][4]) {
     }
 }
 // desenez mascota vorbareata a jocului
-void drawMascot() {
+void drawBuddy() {
     char greetings[5][51] = {
         "  hey there bud! let's play!", "what a nice day to play 2048",
         "          sup buddy?       ", " howdy partner! let's play! ",
@@ -81,7 +81,7 @@ void drawMascot() {
     refresh();
 }
 // afisez meniul jocului
-void setupScreen(char *title, char *ng, char *res, char *load, char *q) {
+void mainScreen(char *title, char *ng, char *res, char *load, char *q) {
     // setez culoarea backroundului
     int height;
     int width;
@@ -90,7 +90,7 @@ void setupScreen(char *title, char *ng, char *res, char *load, char *q) {
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
     attron(COLOR_PAIR(1));
 
-    drawMascot();
+    drawBuddy();
 
     /*desenez meniul jocului la jumatatea ecranului si centrez fiecare cuvant
     in functie de lungimea ecranului si dimenasiunea textului, apoi adaug * in
@@ -104,11 +104,12 @@ void setupScreen(char *title, char *ng, char *res, char *load, char *q) {
     mvaddch(height / 2 - 3, calculatePos(width, strlen(ng)) - 2, star);
     mvaddch(height / 2 - 3, calculatePos(width, strlen(ng)) + strlen(ng) + 1,
             star);
+    mvaddstr(height - 1, width / 2 - 33, "the game automatically saves the current game when you press quit");
     refresh();
     attroff(COLOR_PAIR(1));
 }
 // selectez o optiune si returnez valoarea selectata
-int selectOption(char *title, char *ng, char *res, char *load, char *q) {
+int select(char *title, char *ng, char *res, char *load, char *q) {
     int height;
     int width;
     getmaxyx(stdscr, height, width);
@@ -293,7 +294,7 @@ void drawTable(WINDOW *gameWindow, int table[4][4]) {
     wattron(gameWindow, COLOR_PAIR(7));
     mvwaddstr(gameWindow, height - 2, 2.33,
               " q - go back | w - move up | a - move left | s - move down | d "
-              "- move right ");
+              "- move right "); 
     wattroff(gameWindow, COLOR_PAIR(8));
 
     updateTable(gameWindow, table);
@@ -370,7 +371,7 @@ int isGameOver(int table[4][4]) {
     return 1; 
 }
 
-void moveCell(WINDOW **gameWindow, int table[4][4], int *score) {
+void moveCells(WINDOW **gameWindow, int table[4][4], int *score) {
     int c;
     int i, j, k, p;
     int wMoved, aMoved, sMoved, dMoved;
@@ -607,7 +608,7 @@ void continueGame(WINDOW **gameWindow, int *score, int table[4][4]) {
         wrefresh(*gameWindow);  // dau un refresh la fereastra
         updateTable(*gameWindow, table);  // redesenez celulele pentru a nu le pierde culoarea
         wrefresh(*gameWindow); // dau un refresh
-        moveCell(gameWindow, table, score); // continui jocul
+        moveCells(gameWindow, table, score); // continui jocul
     }
 }
 
@@ -665,7 +666,7 @@ WINDOW *loadGame(int *score, int table[4][4]){
     wrefresh(gameWindow);
 
     // incep jocul
-    moveCell(&gameWindow, table, score);
+    moveCells(&gameWindow, table, score);
     return gameWindow;
 }
 
@@ -694,7 +695,7 @@ WINDOW *newGame(int *score, int table[4][4]) {
     wrefresh(gameWindow);
 
     // incep jocul
-    moveCell(&gameWindow, table, score);
+    moveCells(&gameWindow, table, score);
     return gameWindow;
 }
 
@@ -726,10 +727,10 @@ int main() {
     curs_set(FALSE);       /* Se ascunde cursorul */
     keypad(stdscr, TRUE);  // dau enable la keypad, adica tastele mai speciale
 
-    setupScreen(title, ng, res, load, q);  // afisez ecranul de pornire
+    mainScreen(title, ng, res, load, q);  // afisez ecranul de pornire
 
     while (FOREVER) {
-        switch (selectOption(title, ng, res, load, q)) {
+        switch (select(title, ng, res, load, q)) {
             /* daca a fost selectat New Game, verfic daca deja un joc e inceput
             si daca da, il sterg, altfel voi initializa o tabla de joc noua
             si voi porni jocul, ca mai apoi sa imi redesenez tabla de joc
@@ -742,7 +743,7 @@ int main() {
                 }
                 initTable(table);
                 gameWindow = newGame(score, table);
-                setupScreen(title, ng, res, load, q);
+                mainScreen(title, ng, res, load, q);
                 // sterg mesajul curent si adaug un mesaj random mascotei
                 mvprintw(2, 3, "                             ");
                 k = rand() % 5;
@@ -759,24 +760,24 @@ int main() {
                     struct tm *rawtime = localtime(&now);
                     mvwprintw(gameWindow, 3, (width / 2) - 9.5, "%s",
                               timestr(rawtime, t));
-                    setupScreen(title, ng, res, load, q);
+                    mainScreen(title, ng, res, load, q);
                     mvprintw(2, 3, "                             ");
                     k = rand() % 5;
                     mvaddstr(2, 3, messages[k]);
                     break;
                 } else {
-                    setupScreen(title, ng, res, load, q);
+                    mainScreen(title, ng, res, load, q);
                     mvaddstr(2, 3, " sorry bud, you can't resume ");
                     break;
                 }
             case 3:
                 if (gameWindow != NULL) {
-                    setupScreen(title, ng, res, load, q);
+                    mainScreen(title, ng, res, load, q);
                     mvaddstr(2, 3, "sorry bro you started a game");
                     break;
                 } else {
                     gameWindow = loadGame(score, table);
-                    setupScreen(title, ng, res, load, q);
+                    mainScreen(title, ng, res, load, q);
                     // sterg mesajul curent si adaug un mesaj random mascotei
                     mvprintw(2, 3, "                             ");
                     k = rand() % 5;
