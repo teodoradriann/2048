@@ -4,7 +4,7 @@
 build: 2048
 
 2048: 2048.c
-	gcc -Wall main.c -o 2048 -lcurses
+	gcc -Wall 2048.c -o 2048 -lcurses
 .PHONY:
 
 clean:
