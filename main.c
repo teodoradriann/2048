@@ -583,49 +583,60 @@ void moveD(int table[4][4], int *score, int *dMoved) {
     }
 }
 
-// returnez cea mai buna mutare posibila dpdv al scorului
-int returnTheBestMove(int table[4][4], int *score) {
-    // imi iau o copie a tabelului initial pe care voi face mutarile
-    // si o copie a scorurilor vechi
-    int copyTable[4][4];
-    int oldScore = *score;
-    int scoreAfterW = *score;
-    int scoreAfterS = *score;
-    int scoreAfterA = *score;
-    int scoreAfterD = *score;
-    memcpy(copyTable, table, 16 * sizeof(int));
-
-    // incep mutarile celulelor, dupa fiecare mutare voi aduce tabelul copie
-    // la forma initiala pentru a calcula cea mai eficienta metoda 
-    // de a muta celulele
-    moveW(copyTable, &scoreAfterW, 0);
-    memcpy(copyTable, table, 16 * sizeof(int));
-
-    moveS(copyTable, &scoreAfterS, 0);
-    memcpy(copyTable, table, 16 * sizeof(int));
-
-    moveA(copyTable, &scoreAfterA, 0);
-    memcpy(copyTable, table, 16 * sizeof(int));
-
-    moveD(copyTable, &scoreAfterD, 0);
-
-    // aflu scorul cel mai mare dintre mutari
-    int maxScore = max(scoreAfterW, scoreAfterS, scoreAfterA, scoreAfterD);
-
-    // daca scorul ramane nemodificat atunci nu exista vreo mutare eficienta
-    // si voi prelucra cazul in moveCells
-    if (maxScore == scoreAfterW && maxScore == scoreAfterS && maxScore == scoreAfterA && maxScore == scoreAfterD){
-        return 0;
-    } else if (maxScore == scoreAfterW) {
-        return 1;
-    } else if (maxScore == scoreAfterS) {
-        return 2;
-    } else if (maxScore == scoreAfterA) {
-        return 3;
-    } else if (maxScore == scoreAfterD) {
-        return 4;
+// returnez numarul maxim de celule nulle
+int numberOfNullCells(int table[4][4]){
+    int i;
+    int j;
+    int cntr = 0;
+    for (i = 0; i < 4; i++){
+        for (j = 0; j < 4; j++){
+            if (table[i][j] == 0)
+                cntr++;
+        }
     }
-    return -1;
+    return cntr;
+}
+
+// returnez cea mai buna mutare posibila dpdv al celulelor eliberate
+int returnTheBestMove(int table[4][4]) {
+    // imi iau o copie a tabelului initial pe care voi face mutarile
+    int copyTable[4][4];
+    int i;
+    int score = 0;
+    int max = -666;
+    int freeCells;
+    int bestMove = 0;
+    // 4 mutari
+    for (i = 1; i <= 4; i++){
+        //copiez la fiecare mutare matricea initiala in copie
+        memcpy(copyTable, table, 16 * sizeof(int));
+        int moved = 0;
+        switch (i){
+            case 1:
+                moveW(copyTable, &score, &moved);
+                break;
+            case 2:
+                moveA(copyTable, &score, &moved);
+                break;
+            case 3:
+                moveS(copyTable, &score, &moved);
+                break;
+            case 4:
+                moveD(copyTable, &score, &moved);
+                break;
+            default:
+                break;
+        }
+        // aflu numarul de celule specific mutarii
+        freeCells = numberOfNullCells(copyTable);
+        // daca e mai mare atunci mutarea respectiva are numarul maxim de celule
+        // goale si o retin
+        if (freeCells > max){
+            max = freeCells;
+            bestMove = i;
+        }
+    }
+    return bestMove;
 }
 
 // functia care se ocupa de mutatul celulelor pe tabla de joc
@@ -680,11 +691,8 @@ void moveCells(WINDOW **gameWindow, int table[4][4], int *score) {
             // daca nu exista o mutare care sa creasca cel mai mult scorul
             // atunci nu vom face nimic si vom astepta decizia utilizatorului
             if (elapsedTime >= waitFor) {
-                int move = returnTheBestMove(table, score);
+                int move = returnTheBestMove(table);
                 switch (move) {
-                    case 0:
-                        elapsedTime = 0;
-                        break;
                     case 1:
                         moveW(table, score, &wMoved);
                         break;
