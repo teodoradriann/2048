@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <ncurses.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #define star '*'
@@ -12,8 +13,23 @@ char *timestr(struct tm *t, char *time) {
     return time;
 }
 
+int max(int a, int b, int c, int d) {
+    int max = a;
+    if (b > max) {
+        max = b;
+    }
+    if (c > max) {
+        max = c;
+    }
+    if (d > max) {
+        max = d;
+    }
+    return max;
+}
+
 int calculatePos(int height, int width) { return (height - width) / 2; }
 
+//resetez tabelul la valorea nula
 void resetTable(int table[4][4]) {
     int i;
     int j;
@@ -24,6 +40,7 @@ void resetTable(int table[4][4]) {
     }
 }
 
+// initiez tabelul de joc
 void initTable(int table[4][4]) {
     // initializez toate valorile matricei cu 0 pentru un fresh start
     resetTable(table);
@@ -43,6 +60,7 @@ void initTable(int table[4][4]) {
             continue;
     }
 }
+
 // desenez mascota vorbareata a jocului
 void drawBuddy() {
     char greetings[5][51] = {
@@ -79,6 +97,7 @@ void drawBuddy() {
     mvwprintw(stdscr, 2, 3, greetings[i]);
     refresh();
 }
+
 // afisez meniul jocului
 void mainScreen(char *title, char *ng, char *res, char *load, char *q) {
     // setez culoarea backroundului
@@ -103,10 +122,13 @@ void mainScreen(char *title, char *ng, char *res, char *load, char *q) {
     mvaddch(height / 2 - 3, calculatePos(width, strlen(ng)) - 2, star);
     mvaddch(height / 2 - 3, calculatePos(width, strlen(ng)) + strlen(ng) + 1,
             star);
-    mvaddstr(height - 1, width / 2 - 33, "the game automatically saves the current game when you press quit");
+    mvaddstr(
+        height - 1, width / 2 - 33,
+        "the game automatically saves the current game when you press quit");
     refresh();
     attroff(COLOR_PAIR(1));
 }
+
 // selectez o optiune si returnez valoarea selectata
 int select(char *title, char *ng, char *res, char *load, char *q) {
     int height;
@@ -121,14 +143,18 @@ int select(char *title, char *ng, char *res, char *load, char *q) {
                 if (row > height / 2 - 3) {
                     if (row == height / 2 - 2) {
                         mvaddch(row, calculatePos(width, strlen(res)) - 2, ' ');
-                        mvaddch(row, calculatePos(width, strlen(res)) + strlen(res) + 1,
+                        mvaddch(
+                            row,
+                            calculatePos(width, strlen(res)) + strlen(res) + 1,
                             ' ');
-                    } else if (row == height / 2 - 1){
-                        mvaddch(row, calculatePos(width, strlen(load)) - 2, ' ');
-                        mvaddch(row, calculatePos(width, strlen(load)) + strlen(load) + 1,
-                            ' ');
-                    }
-                    else if (row == height / 2) {
+                    } else if (row == height / 2 - 1) {
+                        mvaddch(row, calculatePos(width, strlen(load)) - 2,
+                                ' ');
+                        mvaddch(row,
+                                calculatePos(width, strlen(load)) +
+                                    strlen(load) + 1,
+                                ' ');
+                    } else if (row == height / 2) {
                         mvaddch(row, calculatePos(width, strlen(q)) - 2, ' ');
                         mvaddch(row,
                                 calculatePos(width, strlen(q)) + strlen(q) + 1,
@@ -153,11 +179,12 @@ int select(char *title, char *ng, char *res, char *load, char *q) {
                             calculatePos(width, strlen(res)) + strlen(res) + 1,
                             ' ');
                     } else if (row == height / 2 - 1) {
-                        mvaddch(row, calculatePos(width, strlen(load)) - 2, ' ');
-                        mvaddch(
-                            row,
-                            calculatePos(width, strlen(load)) + strlen(load) + 1,
-                            ' ');
+                        mvaddch(row, calculatePos(width, strlen(load)) - 2,
+                                ' ');
+                        mvaddch(row,
+                                calculatePos(width, strlen(load)) +
+                                    strlen(load) + 1,
+                                ' ');
                     }
                     row++;  // Move down
                     option++;
@@ -175,7 +202,7 @@ int select(char *title, char *ng, char *res, char *load, char *q) {
             mvaddch(row, calculatePos(width, strlen(res)) - 2, star);
             mvaddch(row, calculatePos(width, strlen(res)) + strlen(res) + 1,
                     star);
-        } else if (row == height / 2 - 1){
+        } else if (row == height / 2 - 1) {
             mvaddch(row, calculatePos(width, strlen(load)) - 2, star);
             mvaddch(row, calculatePos(width, strlen(load)) + strlen(load) + 1,
                     star);
@@ -188,6 +215,7 @@ int select(char *title, char *ng, char *res, char *load, char *q) {
     return 0;
 }
 
+// updatez tabelul de joc
 void updateTable(WINDOW *gameWindow, int table[4][4]) {
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_CYAN, COLOR_BLACK);
@@ -212,9 +240,9 @@ void updateTable(WINDOW *gameWindow, int table[4][4]) {
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 4; j++) {
             if (table[i][j] != 0) {
-                //sterg casuta pentru a afisa noul numar
+                // sterg casuta pentru a afisa noul numar
                 mvwprintw(gameWindow, (y + i * size / 4) + 2, x + j * size + 8,
-                            "    ");
+                          "    ");
                 // selectez culoarea pentru fiecare numar
                 switch (table[i][j]) {
                     case 2:
@@ -254,11 +282,11 @@ void updateTable(WINDOW *gameWindow, int table[4][4]) {
                         wattroff(gameWindow, A_COLOR);
                         break;
                 }
-                //afisez noul numar
+                // afisez noul numar
                 mvwprintw(gameWindow, (y + i * size / 4) + 2, x + j * size + 8,
                           "%d", table[i][j]);
-                wattroff(gameWindow, A_COLOR); //sterg culoarea
-             } else {
+                wattroff(gameWindow, A_COLOR);  // sterg culoarea
+            } else {
                 mvwprintw(gameWindow, (y + i * size / 4) + 2, x + j * size + 8,
                           "    ");
             }
@@ -266,6 +294,7 @@ void updateTable(WINDOW *gameWindow, int table[4][4]) {
     }
     wrefresh(gameWindow);
 }
+
 // desenez tabelul jocului
 void drawTable(WINDOW *gameWindow, int table[4][4]) {
     // imi initialzez toate combinatiile de culori pentru fiecare celula
@@ -293,27 +322,27 @@ void drawTable(WINDOW *gameWindow, int table[4][4]) {
     wattron(gameWindow, COLOR_PAIR(7));
     mvwaddstr(gameWindow, height - 2, 2.33,
               " q - go back | w - move up | a - move left | s - move down | d "
-              "- move right "); 
+              "- move right ");
     wattroff(gameWindow, COLOR_PAIR(8));
 
     updateTable(gameWindow, table);
     wrefresh(gameWindow);  // Refresh the window to show the table
 }
 
+// adaug un numar random pe tabla de joc
 void addRandomNumber(int table[4][4]) {
     int i;
     int j;
     // verific cate celule sunt goale pentru a sti daca mai am loc pe tabla
     int emptyCells = 0;
-    for (i = 0; i < 4; i++){
-        for (j = 0; j < 4; j++){
-            if (table[i][j] == 0)
-                emptyCells++;
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
+            if (table[i][j] == 0) emptyCells++;
         }
     }
-    if (emptyCells == 0)
-        return;
-    //daca mai am loc pe tabla aleg 2 indici random si pun 2 sau 4 in celula respectiva
+    if (emptyCells == 0) return;
+    // daca mai am loc pe tabla aleg 2 indici random si pun 2 sau 4 in celula
+    // respectiva
     int cntr = 0;
     srand(time(NULL));
     while (cntr != 1) {
@@ -327,6 +356,7 @@ void addRandomNumber(int table[4][4]) {
     }
 }
 
+// verific daca jocul e over sau nu
 int isGameOver(int table[4][4]) {
     int i;
     int j;
@@ -339,7 +369,8 @@ int isGameOver(int table[4][4]) {
         }
     }
 
-    // verific daca mai am celule ramase, daca da inseamna ca jocul nu s-a terminat
+    // verific daca mai am celule ramase, daca da inseamna ca jocul nu s-a
+    // terminat
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 4; j++) {
             if (table[i][j] == 0) {
@@ -352,7 +383,7 @@ int isGameOver(int table[4][4]) {
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             if (table[i][j] == table[i][j + 1]) {
-                return 0; 
+                return 0;
             }
         }
     }
@@ -361,225 +392,324 @@ int isGameOver(int table[4][4]) {
     for (j = 0; j < 4; j++) {
         for (i = 0; i < 3; i++) {
             if (table[i][j] == table[i + 1][j]) {
-                return 0; 
+                return 0;
             }
         }
     }
-    
-    //jocul s-a terminat daca am ajuns aici
-    return 1; 
+
+    // jocul s-a terminat daca am ajuns aici
+    return 1;
 }
 
+//mut celulele in sus
+void moveW(int table[4][4], int *score, int *wMoved) {
+    *wMoved = 0;
+    int i, j, k, p;
+    //merg prin matrice pentru a afla unde gasesc prima 
+    //celula libera sau ocupata, cat mai sus posibil
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
+            //daca am gasit o celula libera, voi incepe sa caut sub 
+            //ea numere cu for-ul K
+            if (table[i][j] == 0) {
+                for (k = i + 1; k < 4; k++) {
+                    //daca gasesc o celula sub 0 care are un numar in ea
+                    //incep sa caut iar sub ea sa vad daca mai sunt celule asemenea
+                    if (table[k][j] != 0) {
+                        for (p = k + 1; p < 4; p++) {
+                            //daca am gasit o celula asemenea, o adun la cea initiala
+                            //iar apoi modific scorul si marchez celula din urma cu 0
+                            //pentru ca s-a contopit cu cea de deasupra ei
+                            if (table[k][j] == table[p][j]) {
+                                table[k][j] += table[p][j];
+                                *score += table[k][j];
+                                table[p][j] = 0;
+                                *wMoved = 1;
+                            }
+                        }
+                        //daca nu gasesc nicio celula asemenea cu K pe care 
+                        //sa o contopesc atunci pur si simplu mut celula K
+                        //pe linia I care era 0 si sterg celula K din pozitia
+                        //veche
+                        if (table[i][j] != table[k][j]) {
+                            *wMoved = 1;
+                        }
+                        table[i][j] = table[k][j];
+                        table[k][j] = 0;
+                        break;
+                    }
+                }
+                //daca o celula initiala nu e 0 caut sub ea orice celula K diferita de 0
+                //asemenea cu I pentru a o contopi cu aceasta
+            } else if (table[i][j] != 0) {
+                for (k = i + 1; k < 4; k++) {
+                    if (table[k][j] != 0) {
+                        if (table[i][j] == table[k][j]) {
+                            table[i][j] += table[k][j];
+                            *score += table[i][j];
+                            table[k][j] = 0;
+                            *wMoved = 1;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// algoritmii de mai jos sunt la fel ca cel cu W doar ca parcug matricea
+// in sensuri diferite pentru fiecare directe
+void moveS(int table[4][4], int *score, int *sMoved) {
+    int i, j, k, p;
+    *sMoved = 0;
+    for (i = 3; i >= 0; i--) {
+        for (j = 0; j < 4; j++) {
+            if (table[i][j] == 0) {
+                for (k = i - 1; k >= 0; k--) {
+                    if (table[k][j] != 0) {
+                        for (p = k - 1; p >= 0; p--) {
+                            if (table[k][j] == table[p][j]) {
+                                table[k][j] += table[p][j];
+                                *score += table[k][j];
+                                table[p][j] = 0;
+                                *sMoved = 1;
+                            }
+                        }
+                        if (table[i][j] != table[k][j]) {
+                            *sMoved = 1;
+                        }
+                        table[i][j] = table[k][j];
+                        table[k][j] = 0;
+                        break;
+                    }
+                }
+            } else if (table[i][j] != 0) {
+                for (k = i - 1; k >= 0; k--) {
+                    if (table[k][j] != 0) {
+                        if (table[i][j] == table[k][j]) {
+                            table[i][j] += table[k][j];
+                            *score += table[i][j];
+                            table[k][j] = 0;
+                            *sMoved = 1;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void moveA(int table[4][4], int *score, int *aMoved) {
+    int i, j, k, p;
+    *aMoved = 0;
+    for (j = 0; j < 4; j++) {
+        for (i = 0; i < 4; i++) {
+            if (table[j][i] == 0) {
+                for (k = i + 1; k < 4; k++) {
+                    if (table[j][k] != 0) {
+                        for (p = k + 1; p < 4; p++) {
+                            if (table[j][k] == table[j][p]) {
+                                table[j][k] += table[j][p];
+                                *score += table[j][k];
+                                table[j][p] = 0;
+                                *aMoved = 1;
+                            }
+                        }
+                        if (table[j][i] != table[j][k]) {
+                            *aMoved = 1;
+                        }
+                        table[j][i] = table[j][k];
+                        table[j][k] = 0;
+                        break;
+                    }
+                }
+            } else if (table[j][i] != 0) {
+                for (k = i + 1; k < 4; k++) {
+                    if (table[j][k] != 0) {
+                        if (table[j][i] == table[j][k]) {
+                            table[j][i] += table[j][k];
+                            *score += table[j][i];
+                            table[j][k] = 0;
+                            *aMoved = 1;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void moveD(int table[4][4], int *score, int *dMoved) {
+    int i, j, k, p;
+    *dMoved = 0;
+    for (j = 3; j >= 0; j--) {
+        for (i = 0; i < 4; i++) {
+            if (table[j][i] == 0) {
+                for (k = i - 1; k >= 0; k--) {
+                    if (table[j][k] != 0) {
+                        for (p = k - 1; p >= 0; p--) {
+                            if (table[j][k] == table[j][p]) {
+                                table[j][k] += table[j][p];
+                                *score += table[j][k];
+                                table[j][p] = 0;
+                                *dMoved = 1;
+                            }
+                        }
+                        if (table[j][i] != table[j][k]) {
+                            *dMoved = 1;
+                        }
+                        table[j][i] = table[j][k];
+                        table[j][k] = 0;
+                        break;
+                    }
+                }
+            } else if (table[j][i] != 0) {
+                for (k = i - 1; k >= 0; k--) {
+                    if (table[j][k] != 0) {
+                        if (table[j][i] == table[j][k]) {
+                            table[j][i] += table[j][k];
+                            *score += table[j][i];
+                            table[j][k] = 0;
+                            *dMoved = 1;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// returnez cea mai buna mutare posibila dpdv al scorului
+int returnTheBestMove(int table[4][4], int *score) {
+    // imi iau o copie a tabelului initial pe care voi face mutarile
+    // si o copie a scorurilor vechi
+    int copyTable[4][4];
+    int oldScore = *score;
+    int scoreAfterW = *score;
+    int scoreAfterS = *score;
+    int scoreAfterA = *score;
+    int scoreAfterD = *score;
+    memcpy(copyTable, table, 16 * sizeof(int));
+
+    // incep mutarile celulelor, dupa fiecare mutare voi aduce tabelul copie
+    // la forma initiala pentru a calcula cea mai eficienta metoda 
+    // de a muta celulele
+    moveW(copyTable, &scoreAfterW, 0);
+    memcpy(copyTable, table, 16 * sizeof(int));
+
+    moveS(copyTable, &scoreAfterS, 0);
+    memcpy(copyTable, table, 16 * sizeof(int));
+
+    moveA(copyTable, &scoreAfterA, 0);
+    memcpy(copyTable, table, 16 * sizeof(int));
+
+    moveD(copyTable, &scoreAfterD, 0);
+
+    // aflu scorul cel mai mare dintre mutari
+    int maxScore = max(scoreAfterW, scoreAfterS, scoreAfterA, scoreAfterD);
+
+    // daca scorul ramane nemodificat atunci nu exista vreo mutare eficienta
+    // si voi prelucra cazul in moveCells
+    if (maxScore == scoreAfterW && maxScore == scoreAfterS && maxScore == scoreAfterA && maxScore == scoreAfterD){
+        return 0;
+    } else if (maxScore == scoreAfterW) {
+        return 1;
+    } else if (maxScore == scoreAfterS) {
+        return 2;
+    } else if (maxScore == scoreAfterA) {
+        return 3;
+    } else if (maxScore == scoreAfterD) {
+        return 4;
+    }
+    return -1;
+}
+
+// functia care se ocupa de mutatul celulelor pe tabla de joc
 void moveCells(WINDOW **gameWindow, int table[4][4], int *score) {
     int c;
-    int i, j, k, p;
     int wMoved, aMoved, sMoved, dMoved;
     int gameOver = 0;
     int width;
     int height;
+    int waitFor = 200;  // 20 de secunde
+    int elapsedTime = 0;
     getmaxyx(*gameWindow, height, width);
-    while ((c = getch()) != 'q' && !gameOver) {
-        switch (c) {
-            case 'w':
-                wMoved = 0;
-                for (i = 0; i < 4; i++) {
-                    for (j = 0; j < 4; j++) {
-                        if (table[i][j] == 0) {
-                            for (k = i + 1; k < 4; k++) {
-                                if (table[k][j] != 0) {
-                                    for (p = k + 1; p < 4; p++) {
-                                        if (table[k][j] == table[p][j]) {
-                                            table[k][j] += table[p][j];
-                                            *score += table[k][j];
-                                            table[p][j] = 0;
-                                            wMoved = 1;
-                                            break;
-                                        }
-                                    }
-                                    if (table[i][j] != table[k][j]) {
-                                        wMoved = 1;
-                                    }
-                                    table[i][j] = table[k][j];
-                                    table[k][j] = 0;
-                                    break;
-                                }
-                            }
-                        } else if (table[i][j] != 0) {
-                            for (k = i + 1; k < 4; k++) {
-                                if (table[i][j] == table[k][j]) {
-                                    table[i][j] += table[k][j];
-                                    *score += table[i][j];
-                                    table[k][j] = 0;
-                                    wMoved = 1;
-                                    break;
-                                } else
-                                    break;
-                            }
-                        }
-                    }
+
+    timeout(100);  // dupa o secunda de asteptare getch va returna ERR
+    nodelay(*gameWindow, TRUE); // functia getch va returna ERR dupa o secunda in care nu exista input
+
+    while (FOREVER) {
+        c = getch();
+        // daca avem input de la utilizator mutam celulele in mod corespunzator
+        if (c != ERR) {
+            elapsedTime = 0;
+            switch (c) {
+                case 'w':
+                    moveW(table, score, &wMoved);
+                    break;
+                case 'a':
+                    moveA(table, score, &aMoved);
+                    break;
+                case 's':
+                    moveS(table, score, &sMoved);
+                    break;
+                case 'd':
+                    moveD(table, score, &dMoved);
+                    break;
+            }
+            // daca s-a mutat vreo celula punem un numar random pe tabla
+            // si modificam scorul
+            if (wMoved || aMoved || sMoved || dMoved) {
+                addRandomNumber(table);
+                updateTable(*gameWindow, table);
+                mvwprintw(*gameWindow, 2, (width / 2) - strlen("2048") / 2 - 2,
+                          "Score: %d", *score);
+                wrefresh(*gameWindow);
+            }
+            // daca nu avem input de la utilizator, vom incrementa in fiecare secunda
+            // timpul care a trecut
+        } else {
+            elapsedTime++;
+            // daca timpul care a trecut e mai mare sau egal cu 
+            // timpul pe care trebuia sa il asteptam vom afla cea mai buna
+            // mutare si vom muta acolo.
+            // daca nu exista o mutare care sa creasca cel mai mult scorul
+            // atunci nu vom face nimic si vom astepta decizia utilizatorului
+            if (elapsedTime >= waitFor) {
+                int move = returnTheBestMove(table, score);
+                switch (move) {
+                    case 0:
+                        elapsedTime = 0;
+                        break;
+                    case 1:
+                        moveW(table, score, &wMoved);
+                        break;
+                    case 2:
+                        moveA(table, score, &aMoved);
+                        break;
+                    case 3:
+                        moveS(table, score, &sMoved);
+                        break;
+                    case 4:
+                        moveD(table, score, &dMoved);
+                        break;
                 }
-                if (wMoved) {
+                if (wMoved || aMoved || sMoved || dMoved) {
                     addRandomNumber(table);
                     updateTable(*gameWindow, table);
                     mvwprintw(*gameWindow, 2,
-                              (width / 2) - strlen("2048") / 2 - 2, "Score: %d",
-                              *score);
+                                (width / 2) - strlen("2048") / 2 - 2,
+                                "Score: %d", *score);
                     wrefresh(*gameWindow);
                 }
-                break;
-            case 'a':
-                aMoved = 0;
-                for (j = 0; j < 4; j++) {
-                    for (i = 0; i < 4; i++) {
-                        if (table[j][i] == 0) {
-                            for (k = i + 1; k < 4; k++) {
-                                if (table[j][k] != 0) {
-                                    for (p = k + 1; p < 4; p++) {
-                                        if (table[j][k] == table[j][p]) {
-                                            table[j][k] += table[j][p];
-                                            *score += table[j][k];
-                                            table[j][p] = 0;
-                                            aMoved = 1;
-                                            break;
-                                        }
-                                    }
-                                    if (table[j][i] != table[j][k]) {
-                                        aMoved = 1;
-                                    }
-                                    table[j][i] = table[j][k];
-                                    table[j][k] = 0;
-                                    break;
-                                }
-                            }
-                        } else {
-                            for (k = i + 1; k < 4; k++) {
-                                if (table[j][k] != 0) {
-                                    if (table[j][i] == table[j][k]) {
-                                        table[j][i] += table[j][k];
-                                        *score += table[j][i];
-                                        table[j][k] = 0;
-                                        aMoved = 1;
-                                        break;
-                                    } else {
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if (aMoved) {
-                    addRandomNumber(table);
-                    updateTable(*gameWindow, table);
-                    mvwprintw(*gameWindow, 2,
-                              (width / 2) - strlen("2048") / 2 - 2, "Score: %d",
-                              *score);
-                    wrefresh(*gameWindow);
-                }
-                break;
-            case 's':
-                sMoved = 0;
-                for (i = 3; i >= 0; i--) {
-                    for (j = 0; j < 4; j++) {
-                        if (table[i][j] == 0) {
-                            for (k = i - 1; k >= 0; k--) {
-                                if (table[k][j] != 0) {
-                                    for (p = k - 1; p >= 0; p--) {
-                                        if (table[k][j] == table[p][j]) {
-                                            table[k][j] += table[p][j];
-                                            *score += table[k][j];
-                                            table[p][j] = 0;
-                                            sMoved = 1;
-                                            break;
-                                        }
-                                    }
-                                    if (table[i][j] != table[k][j]) {
-                                        sMoved = 1;
-                                    }
-                                    table[i][j] = table[k][j];
-                                    table[k][j] = 0;
-                                    break;
-                                }
-                            }
-                        } else {
-                            for (k = i - 1; k >= 0; k--) {
-                                if (table[k][j] != 0) {
-                                    if (table[i][j] == table[k][j]) {
-                                        table[i][j] += table[k][j];
-                                        *score += table[i][j];
-                                        table[k][j] = 0;
-                                        sMoved = 1;
-                                        break;
-                                    } else {
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if (sMoved) {
-                    addRandomNumber(table);
-                    updateTable(*gameWindow, table);
-                    mvwprintw(*gameWindow, 2,
-                              (width / 2) - strlen("2048") / 2 - 2, "Score: %d",
-                              *score);
-                    wrefresh(*gameWindow);
-                }
-                break;
-            case 'd':
-                dMoved = 0;
-                for (j = 3; j >= 0; j--) {
-                    for (i = 0; i < 4; i++) {
-                        if (table[j][i] == 0) {
-                            for (k = i - 1; k >= 0; k--) {
-                                if (table[j][k] != 0) {
-                                    for (p = k - 1; p >= 0; p--) {
-                                        if (table[j][k] == table[j][p]) {
-                                            table[j][k] += table[j][p];
-                                            *score += table[j][k];
-                                            table[j][p] = 0;
-                                            dMoved = 1;
-                                            break;
-                                        }
-                                    }
-                                    if (table[j][i] != table[j][k]) {
-                                        dMoved = 1;
-                                    }
-                                    table[j][i] = table[j][k];
-                                    table[j][k] = 0;
-                                    break;
-                                }
-                            }
-                        } else {
-                            for (k = i - 1; k >= 0; k--) {
-                                if (table[j][k] != 0) {
-                                    if (table[j][i] == table[j][k]) {
-                                        table[j][i] += table[j][k];
-                                        *score += table[j][i];
-                                        table[j][k] = 0;
-                                        dMoved = 1;
-                                        break;
-                                    } else {
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if (dMoved) {
-                    addRandomNumber(table);
-                    updateTable(*gameWindow, table);
-                    mvwprintw(*gameWindow, 2,
-                              (width / 2) - strlen("2048") / 2 - 2, "Score: %d",
-                              *score);
-                    wrefresh(*gameWindow);
-                }
-                break;
-            default:
-                break;
+                elapsedTime = 0;
+            }
         }
+        // verificam daca jocul s-a terminat sau nu
         gameOver = isGameOver(table);
         if (gameOver) {
             mvwprintw(*gameWindow, height - 1,
@@ -587,6 +717,7 @@ void moveCells(WINDOW **gameWindow, int table[4][4], int *score) {
             wrefresh(*gameWindow);
             delwin(*gameWindow);
             *gameWindow = NULL;
+            break;  // ies din loop cand e game over
         }
     }
     if (tolower(c) == 'q') {
@@ -596,30 +727,36 @@ void moveCells(WINDOW **gameWindow, int table[4][4], int *score) {
     }
 }
 
+// functia care continua jocul 
 void continueGame(WINDOW **gameWindow, int *score, int table[4][4]) {
     /* daca fereastra nu e NULL inseamna ca am un joc in desfasurare pe care
     pot sa il reiau, daca e NULL nu fac nimic
     */
-    if (*gameWindow == NULL){
+    if (*gameWindow == NULL) {
         return;
     } else {
         touchwin(*gameWindow);  // merg in fereastra de joc
         wrefresh(*gameWindow);  // dau un refresh la fereastra
-        updateTable(*gameWindow, table);  // redesenez celulele pentru a nu le pierde culoarea
-        wrefresh(*gameWindow); // dau un refresh
-        moveCells(gameWindow, table, score); // continui jocul
+        updateTable(
+            *gameWindow,
+            table);  // redesenez celulele pentru a nu le pierde culoarea
+        wrefresh(*gameWindow);                // dau un refresh
+        moveCells(gameWindow, table, score);  // continui jocul
     }
 }
 
-void saveGame(int *score, int table[4][4]){
-    FILE* save = fopen("save.txt", "w");
-    if (save == NULL){
+// functia prin care salvez jocul
+void saveGame(int *score, int table[4][4]) {
+    // deschid un fisier save in care sa pun datele jocului
+    FILE *save = fopen("save.txt", "w");
+    if (save == NULL) {
         return;
     }
+    // salvez matricea curenta si scorul
     int i;
     int j;
-    for (i = 0; i < 4; i++){
-        for (j = 0; j < 4; j++){
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
             fprintf(save, "%d ", table[i][j]);
         }
         fprintf(save, "\n");
@@ -628,27 +765,28 @@ void saveGame(int *score, int table[4][4]){
     fclose(save);
 }
 
-WINDOW *loadGame(int *score, int table[4][4]){
+// functia care da load la joc
+WINDOW *loadGame(int *score, int table[4][4]) {
     // functia loadGame e practic la fel ca newGame doar ca citeste valorile
     // salvate din fisier si initializeaza tabla de joc cu ele
     // initializez o noua fereastra de joc
     int height;
     int width;
     FILE *saveFile = fopen("save.txt", "r");
-    if (saveFile == NULL){
+    if (saveFile == NULL) {
         return NULL;
     }
-    //citesc matricea din fisier
+    // citesc matricea din fisier
     int i;
     int j;
-    for (i = 0; i < 4; i++){
-        for (j = 0; j < 4; j++){
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
             fscanf(saveFile, "%d", &table[i][j]);
         }
     }
-    fscanf(saveFile, "%d", score); //citesc scorul
+    fscanf(saveFile, "%d", score);  // citesc scorul
     getmaxyx(stdscr, height, width);
-    if (isGameOver(table)){
+    if (isGameOver(table)) {
         return NULL;
     }
     WINDOW *gameWindow = NULL;
@@ -672,6 +810,7 @@ WINDOW *loadGame(int *score, int table[4][4]){
     return gameWindow;
 }
 
+// functia care incepe un joc nou
 WINDOW *newGame(int *score, int table[4][4]) {
     // initializez o noua fereastra de joc
     int height;
@@ -771,6 +910,11 @@ int main() {
                     mvaddstr(2, 3, " sorry bud, you can't resume ");
                     break;
                 }
+            /* daca Load e selectat, verific daca am un joc inceput
+            daca un nou joc e inceput, nu pot sa dau load la cel vechi
+            pentru ca l-as suprascrie pe acesta. daca nu e inceput
+            atunci dau load la vechiul joc 
+            */
             case 3:
                 if (gameWindow != NULL) {
                     mainScreen(title, ng, res, load, q);
@@ -778,7 +922,7 @@ int main() {
                     break;
                 } else {
                     gameWindow = loadGame(score, table);
-                    if (gameWindow == NULL){
+                    if (gameWindow == NULL) {
                         mainScreen(title, ng, res, load, q);
                         mvprintw(2, 3, "                             ");
                         mvaddstr(2, 3, " the last game was over homie");
@@ -792,7 +936,8 @@ int main() {
                     break;
                 }
             /*
-            pentru quit inchid orice fereastra e deschisa si ies din program
+            pentru quit inchid orice fereastra e deschisa salvez jocul curent 
+            si ies din program
             */
             case 4:
                 if (gameWindow != NULL) {
