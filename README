@@ -37,6 +37,11 @@ Am verificat dupa fiecare mutare daca jocul s-a terminat sau nu, si daca s-a ter
 Functiile returnTheBestMove si numberOfNullCells se ocupa de capacitatea jocului de a se juca singur si de a alege
 cea mai buna mutare care sa elibereze cele mai multe spatii. 
 
+--cerinta 5--
+Am verificat in functia moveCells dupa fiecare mutare daca jocul s-a terminat sau nu, si daca s-a terminat am afisat 
+un mesaj de Game Over.
+
+
 Fiecare functie e explicata pe indelete in 2048.c. Am pus foarte mult accent pe designul jocului si am vrut sa fie
 cat mai frumos cu putinta.
 Unele din cele mai interesante features ale jocului meu
@@ -53,5 +58,3 @@ cu ea de pe rand sau coloana pentru a le imbina.
 O alta functionalitate interesanta a jocului meu este posisiblitatea de a relua un joc (Load) chiar daca inchizi aplicatia.
 Jocul salveaza automat un joc care este in desfasurare cand inchizi programul cu Quit din meniu, iar cand deschizi
 jocul din nou te poti bucura de jocul ramas fara intrerupere.
-
-
