@@ -4,7 +4,7 @@
 #include <string.h>
 #include <time.h>
 
-#define star '*'
+#define STAR '*'
 #define FOREVER 1
 
 char *timestr(struct tm *t, char *time) {
@@ -29,7 +29,7 @@ int max(int a, int b, int c, int d) {
 
 int calculatePos(int height, int width) { return (height - width) / 2; }
 
-//resetez tabelul la valorea nula
+// resetez tabelul la valorea nula
 void resetTable(int table[4][4]) {
     int i;
     int j;
@@ -119,9 +119,9 @@ void mainScreen(char *title, char *ng, char *res, char *load, char *q) {
     mvaddstr(height / 2 - 2, calculatePos(width, strlen(res)), res);
     mvaddstr(height / 2 - 1, calculatePos(width, strlen(load)), load);
     mvaddstr(height / 2, calculatePos(width, strlen(q)), q);
-    mvaddch(height / 2 - 3, calculatePos(width, strlen(ng)) - 2, star);
+    mvaddch(height / 2 - 3, calculatePos(width, strlen(ng)) - 2, STAR);
     mvaddch(height / 2 - 3, calculatePos(width, strlen(ng)) + strlen(ng) + 1,
-            star);
+            STAR);
     mvaddstr(
         height - 1, width / 2 - 33,
         "the game automatically saves the current game when you press quit");
@@ -195,20 +195,20 @@ int select(char *title, char *ng, char *res, char *load, char *q) {
                 break;
         }
         if (row == height / 2 - 3) {
-            mvaddch(row, calculatePos(width, strlen(ng)) - 2, star);
+            mvaddch(row, calculatePos(width, strlen(ng)) - 2, STAR);
             mvaddch(row, calculatePos(width, strlen(ng)) + strlen(ng) + 1,
-                    star);
+                    STAR);
         } else if (row == height / 2 - 2) {
-            mvaddch(row, calculatePos(width, strlen(res)) - 2, star);
+            mvaddch(row, calculatePos(width, strlen(res)) - 2, STAR);
             mvaddch(row, calculatePos(width, strlen(res)) + strlen(res) + 1,
-                    star);
+                    STAR);
         } else if (row == height / 2 - 1) {
-            mvaddch(row, calculatePos(width, strlen(load)) - 2, star);
+            mvaddch(row, calculatePos(width, strlen(load)) - 2, STAR);
             mvaddch(row, calculatePos(width, strlen(load)) + strlen(load) + 1,
-                    star);
+                    STAR);
         } else if (row == height / 2) {
-            mvaddch(row, calculatePos(width, strlen(q)) - 2, star);
-            mvaddch(row, calculatePos(width, strlen(q)) + strlen(q) + 1, star);
+            mvaddch(row, calculatePos(width, strlen(q)) - 2, STAR);
+            mvaddch(row, calculatePos(width, strlen(q)) + strlen(q) + 1, STAR);
         }
         refresh();  // Refresh the screen to show the new position
     }
@@ -401,7 +401,7 @@ int isGameOver(int table[4][4]) {
     return 1;
 }
 
-//mut celulele in sus
+// mut celulele in sus
 void moveW(int table[4][4], int *score, int *wMoved) {
     *wMoved = 0;
     int i, j, k, p;
@@ -584,14 +584,13 @@ void moveD(int table[4][4], int *score, int *dMoved) {
 }
 
 // returnez numarul maxim de celule nulle
-int numberOfNullCells(int table[4][4]){
+int numberOfNullCells(int table[4][4]) {
     int i;
     int j;
     int cntr = 0;
-    for (i = 0; i < 4; i++){
-        for (j = 0; j < 4; j++){
-            if (table[i][j] == 0)
-                cntr++;
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
+            if (table[i][j] == 0) cntr++;
         }
     }
     return cntr;
@@ -602,16 +601,16 @@ int returnTheBestMove(int table[4][4]) {
     // imi iau o copie a tabelului initial pe care voi face mutarile
     int copyTable[4][4];
     int i;
-    int score = 0;
     int max = -666;
     int freeCells;
     int bestMove = 0;
+    int score = 0;
     // 4 mutari
-    for (i = 1; i <= 4; i++){
-        //copiez la fiecare mutare matricea initiala in copie
+    for (i = 1; i <= 4; i++) {
+        // copiez la fiecare mutare matricea initiala in copie
         memcpy(copyTable, table, 16 * sizeof(int));
         int moved = 0;
-        switch (i){
+        switch (i) {
             case 1:
                 moveW(copyTable, &score, &moved);
                 break;
@@ -631,7 +630,7 @@ int returnTheBestMove(int table[4][4]) {
         freeCells = numberOfNullCells(copyTable);
         // daca e mai mare atunci mutarea respectiva are numarul maxim de celule
         // goale si o retin
-        if (freeCells > max){
+        if (freeCells > max) {
             max = freeCells;
             bestMove = i;
         }
@@ -642,7 +641,6 @@ int returnTheBestMove(int table[4][4]) {
 // functia care se ocupa de mutatul celulelor pe tabla de joc
 void moveCells(WINDOW **gameWindow, int table[4][4], int *score) {
     int c;
-    int wMoved, aMoved, sMoved, dMoved;
     int gameOver = 0;
     int width;
     int height;
@@ -651,67 +649,74 @@ void moveCells(WINDOW **gameWindow, int table[4][4], int *score) {
     getmaxyx(*gameWindow, height, width);
 
     timeout(100);  // dupa o secunda de asteptare getch va returna ERR
-    nodelay(*gameWindow, TRUE); // functia getch va returna ERR dupa o secunda in care nu exista input
+    nodelay(*gameWindow, TRUE);  // functia getch va returna ERR dupa o secunda
+                                 // in care nu exista input
 
     while (FOREVER) {
         c = getch();
         // daca avem input de la utilizator mutam celulele in mod corespunzator
         if (c != ERR) {
+            int moved = 0;
             elapsedTime = 0;
             switch (c) {
                 case 'w':
-                    moveW(table, score, &wMoved);
+                    moveW(table, score, &moved);
                     break;
                 case 'a':
-                    moveA(table, score, &aMoved);
+                    moveA(table, score, &moved);
                     break;
                 case 's':
-                    moveS(table, score, &sMoved);
+                    moveS(table, score, &moved);
                     break;
                 case 'd':
-                    moveD(table, score, &dMoved);
+                    moveD(table, score, &moved);
+                    break;
+                default:
                     break;
             }
-            // daca s-a mutat vreo celula punem un numar random pe tabla
-            // si modificam scorul
-            if (wMoved || aMoved || sMoved || dMoved) {
+            if (moved) {
+                // A valid move was performed
                 addRandomNumber(table);
                 updateTable(*gameWindow, table);
                 mvwprintw(*gameWindow, 2, (width / 2) - strlen("2048") / 2 - 2,
                           "Score: %d", *score);
                 wrefresh(*gameWindow);
+                elapsedTime = 0;
             }
-            // daca nu avem input de la utilizator, vom incrementa in fiecare secunda
-            // timpul care a trecut
+            // daca s-a mutat vreo celula punem un numar random pe tabla
+            // si modificam scorul
+            // daca nu avem input de la utilizator, vom incrementa in fiecare
+            // secunda timpul care a trecut
         } else {
             elapsedTime++;
-            // daca timpul care a trecut e mai mare sau egal cu 
+            // daca timpul care a trecut e mai mare sau egal cu
             // timpul pe care trebuia sa il asteptam vom afla cea mai buna
             // mutare si vom muta acolo.
             // daca nu exista o mutare care sa creasca cel mai mult scorul
             // atunci nu vom face nimic si vom astepta decizia utilizatorului
             if (elapsedTime >= waitFor) {
                 int move = returnTheBestMove(table);
+                int moved = 0;
                 switch (move) {
                     case 1:
-                        moveW(table, score, &wMoved);
+                        moveW(table, score, &moved);
                         break;
                     case 2:
-                        moveA(table, score, &aMoved);
+                        moveA(table, score, &moved);
                         break;
                     case 3:
-                        moveS(table, score, &sMoved);
+                        moveS(table, score, &moved);
                         break;
                     case 4:
-                        moveD(table, score, &dMoved);
+                        moveD(table, score, &moved);
                         break;
                 }
-                if (wMoved || aMoved || sMoved || dMoved) {
+                if (moved) {
                     addRandomNumber(table);
                     updateTable(*gameWindow, table);
                     mvwprintw(*gameWindow, 2,
-                                (width / 2) - strlen("2048") / 2 - 2,
-                                "Score: %d", *score);
+                              (width / 2) - strlen("2048") / 2 - 2, "Score: %d",
+                              *score);
                     wrefresh(*gameWindow);
                 }
                 elapsedTime = 0;
@@ -735,7 +740,7 @@ void moveCells(WINDOW **gameWindow, int table[4][4], int *score) {
     }
 }
 
-// functia care continua jocul 
+// functia care continua jocul
 void continueGame(WINDOW **gameWindow, int *score, int table[4][4]) {
     /* daca fereastra nu e NULL inseamna ca am un joc in desfasurare pe care
     pot sa il reiau, daca e NULL nu fac nimic
@@ -921,7 +926,7 @@ int main() {
             /* daca Load e selectat, verific daca am un joc inceput
             daca un nou joc e inceput, nu pot sa dau load la cel vechi
             pentru ca l-as suprascrie pe acesta. daca nu e inceput
-            atunci dau load la vechiul joc 
+            atunci dau load la vechiul joc
             */
             case 3:
                 if (gameWindow != NULL) {
@@ -944,7 +949,7 @@ int main() {
                     break;
                 }
             /*
-            pentru quit inchid orice fereastra e deschisa salvez jocul curent 
+            pentru quit inchid orice fereastra e deschisa salvez jocul curent
             si ies din program
             */
             case 4:
