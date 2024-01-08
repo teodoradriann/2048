@@ -402,7 +402,7 @@ int isGameOver(int table[4][4]) {
 }
 
 // mut celulele in sus
-void moveW(int table[4][4], int *score, int *wMoved) {
+void moveUp(int table[4][4], int *score, int *wMoved) {
     *wMoved = 0;
     int i, j, k, p;
     //merg prin matrice pentru a afla unde gasesc prima 
@@ -460,7 +460,7 @@ void moveW(int table[4][4], int *score, int *wMoved) {
 
 // algoritmii de mai jos sunt la fel ca cel cu W doar ca parcug matricea
 // in sensuri diferite pentru fiecare directe
-void moveS(int table[4][4], int *score, int *sMoved) {
+void moveDown(int table[4][4], int *score, int *sMoved) {
     int i, j, k, p;
     *sMoved = 0;
     for (i = 3; i >= 0; i--) {
@@ -501,7 +501,7 @@ void moveS(int table[4][4], int *score, int *sMoved) {
     }
 }
 
-void moveA(int table[4][4], int *score, int *aMoved) {
+void moveLeft(int table[4][4], int *score, int *aMoved) {
     int i, j, k, p;
     *aMoved = 0;
     for (j = 0; j < 4; j++) {
@@ -542,7 +542,7 @@ void moveA(int table[4][4], int *score, int *aMoved) {
     }
 }
 
-void moveD(int table[4][4], int *score, int *dMoved) {
+void moveRight(int table[4][4], int *score, int *dMoved) {
     int i, j, k, p;
     *dMoved = 0;
     for (j = 3; j >= 0; j--) {
@@ -612,16 +612,16 @@ int returnTheBestMove(int table[4][4]) {
         int moved = 0;
         switch (i) {
             case 1:
-                moveW(copyTable, &score, &moved);
+                moveUp(copyTable, &score, &moved);
                 break;
             case 2:
-                moveA(copyTable, &score, &moved);
+                moveLeft(copyTable, &score, &moved);
                 break;
             case 3:
-                moveS(copyTable, &score, &moved);
+                moveDown(copyTable, &score, &moved);
                 break;
             case 4:
-                moveD(copyTable, &score, &moved);
+                moveRight(copyTable, &score, &moved);
                 break;
             default:
                 break;
@@ -660,16 +660,16 @@ void moveCells(WINDOW **gameWindow, int table[4][4], int *score) {
             elapsedTime = 0;
             switch (c) {
                 case 'w':
-                    moveW(table, score, &moved);
+                    moveUp(table, score, &moved);
                     break;
                 case 'a':
-                    moveA(table, score, &moved);
+                    moveLeft(table, score, &moved);
                     break;
                 case 's':
-                    moveS(table, score, &moved);
+                    moveDown(table, score, &moved);
                     break;
                 case 'd':
-                    moveD(table, score, &moved);
+                    moveRight(table, score, &moved);
                     break;
                 default:
                     break;
@@ -699,16 +699,16 @@ void moveCells(WINDOW **gameWindow, int table[4][4], int *score) {
                 int moved = 0;
                 switch (move) {
                     case 1:
-                        moveW(table, score, &moved);
+                        moveUp(table, score, &moved);
                         break;
                     case 2:
-                        moveA(table, score, &moved);
+                        moveLeft(table, score, &moved);
                         break;
                     case 3:
-                        moveS(table, score, &moved);
+                        moveDown(table, score, &moved);
                         break;
                     case 4:
-                        moveD(table, score, &moved);
+                        moveRight(table, score, &moved);
                         break;
                 }
                 if (moved) {
@@ -728,6 +728,8 @@ void moveCells(WINDOW **gameWindow, int table[4][4], int *score) {
             mvwprintw(*gameWindow, height - 1,
                       (width / 2) - strlen("GAME OVER!") / 2, "GAME OVER!");
             wrefresh(*gameWindow);
+            nodelay(*gameWindow, FALSE);
+            getchar();
             delwin(*gameWindow);
             *gameWindow = NULL;
             break;  // ies din loop cand e game over

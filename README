@@ -10,7 +10,32 @@ Implementarea jocului mi-a luat aproximativ 24 de ore. Am ales sa fac jocul in f
 80x24 pentru ca asa se vedea mascota cel mai bine cat si numerele din tabla, neavand posibilitatea sa scalez textul
 pe care acesta il rosteste la o dimensiune mai mare.
 
-Am ales sa fac un meniu simplist si dragut 
+--cerinta 1--
+Am ales sa fac un meniu simplist si dragut in care sa poti naviga cu ajutorul sagetilor si sa alegi
+optiunea dorita cu ajutorul tastei Enter. Mascota este principala atractie a meniului si te intampina
+cu un mesaj de bun venit. Daca alegi optiunea de New Game, jocul se va incepe si vei putea sa te joci.
+Daca alegi optiunea de Resume, jocul se va incarca si vei putea sa continui jocul de unde ai ramas.
+Daca alegi optiunea de Load, jocul va incarca ultimul joc salvat si vei putea sa continui jocul de unde ai ramas.
+Daca alegi optiunea de Quit, jocul se va inchide si vei reveni la terminal.
+La acesta cerinta am folosit functiile drawBuddy care deseneaza mascota, mainScreen care deseneaza ecranul principal
+si select care muta * in functie de optiunea aleasa.
+
+--cerinta 2--
+Am desenat tabla de joc folosindu-ma de functiile drawTable si updateTable.
+Functia updateTable updateaza table de joc cu numerele din matricea table insa modifica si culoarea fontului in functie
+de numarul din celula. Am ales sa folosesc culori diferite pentru fiecare numar pentru a face jocul mai atractiv.
+Functia drawTable deseneaza tabla de joc cu - si | si apeleaza functia updateTable pentru a desena numerele din celule.
+
+--cerinta 3--
+Pentru aceasta cerinta am folosit functiile moveUp, moveDown, moveLeft si moveRight care muta celulele in sus, jos,
+stanga si dreapta. Am ales sa fac o functie pentru fiecare directie pentru a face codul mai usor de inteles si de
+modificat. Fiecare functie muta celulele in directia dorita si verifica daca acestea coincid pentru a le aduna.
+Daca celula nu e libera, functia cauta celule asemenea cu ea pe rand sau coloana pentru a le imbina.
+Am verificat dupa fiecare mutare daca jocul s-a terminat sau nu, si daca s-a terminat am afisat un mesaj de Game Over.
+
+--cerinta 4--
+Functiile returnTheBestMove si numberOfNullCells se ocupa de capacitatea jocului de a se juca singur si de a alege
+cea mai buna mutare care sa elibereze cele mai multe spatii. 
 
 Fiecare functie e explicata pe indelete in 2048.c. Am pus foarte mult accent pe designul jocului si am vrut sa fie
 cat mai frumos cu putinta.
