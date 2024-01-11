@@ -683,6 +683,12 @@ void moveCells(WINDOW **gameWindow, int table[4][4], int *score) {
                 wrefresh(*gameWindow);
                 elapsedTime = 0;
             }
+            if (tolower(c) == 'q') {
+                // merg in fereastra principala si ii dau refresh
+                touchwin(stdscr);
+                wrefresh(stdscr);
+                return;
+            }
             // daca s-a mutat vreo celula punem un numar random pe tabla
             // si modificam scorul
             // daca nu avem input de la utilizator, vom incrementa in fiecare
@@ -734,11 +740,6 @@ void moveCells(WINDOW **gameWindow, int table[4][4], int *score) {
             *gameWindow = NULL;
             break;  // ies din loop cand e game over
         }
-    }
-    if (tolower(c) == 'q') {
-        // merg in fereastra principala si ii dau refresh
-        touchwin(stdscr);
-        wrefresh(stdscr);
     }
 }
 
