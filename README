@@ -1,60 +1,33 @@
-Aceasta este abordarea mea cu privire la jocul 2048. Am ales sa fac o interfata user-friendly si care
-sa fie appealing din punct de vedere vizual folosind diverse culori pentru a marca numerele din celule
-si adaugand un personaj dragut care reprezinta companionul utilizatorului in jocul meu.
-Companionul jocului este ceva la care m-am gandit ca ar face jocul meu inedit si dragut. Acesta nu e
-pe postul doar de mascota dar este si un bun ajutor care iti atrage atentia daca poti sau nu folosi
-o comanda. El te intampina mereu cu cate un mesaj de bun venit, si daca vrei sa iesi din joc se supara
-si te roaga sa continui sa te joci.
+This is my approach to the 2048 game. I chose to create a user-friendly interface that is visually appealing by using various colors to mark the numbers in the cells and by adding a cute character who serves as the player’s companion in my game. The game companion is something I thought would make my game unique and charming. It is not only a mascot but also a helpful assistant that alerts you whether or not you can use a command. It always greets you with a welcome message, and if you want to exit the game, it gets upset and asks you to keep playing.
 
-Implementarea jocului mi-a luat aproximativ 24 de ore. Am ales sa fac jocul in formaul basic de terminal
-80x24 pentru ca asa se vedea mascota cel mai bine cat si numerele din tabla, neavand posibilitatea sa scalez textul
-pe care acesta il rosteste la o dimensiune mai mare.
+The implementation of the game took me approximately 24 hours. I chose to make the game in the basic terminal format of 80x24 because that way, the mascot and the numbers on the board were best visible, given that I couldn’t scale the text that the mascot speaks to a larger size.
 
---cerinta 1--
-Am ales sa fac un meniu simplist si dragut in care sa poti naviga cu ajutorul sagetilor si sa alegi
-optiunea dorita cu ajutorul tastei Enter. Mascota este principala atractie a meniului si te intampina
-cu un mesaj de bun venit. Daca alegi optiunea de New Game, jocul se va incepe si vei putea sa te joci.
-Daca alegi optiunea de Resume, jocul se va incarca si vei putea sa continui jocul de unde ai ramas.
-Daca alegi optiunea de Load, jocul va incarca ultimul joc salvat si vei putea sa continui jocul de unde ai ramas.
-Daca alegi optiunea de Quit, jocul se va inchide si vei reveni la terminal.
-La acesta cerinta am folosit functiile drawBuddy care deseneaza mascota, mainScreen care deseneaza ecranul principal
-si select care muta * in functie de optiunea aleasa.
+–Requirement 1–
 
---cerinta 2--
-Am desenat tabla de joc folosindu-ma de functiile drawTable si updateTable.
-Functia updateTable updateaza table de joc cu numerele din matricea table insa modifica si culoarea fontului in functie
-de numarul din celula. Am ales sa folosesc culori diferite pentru fiecare numar pentru a face jocul mai atractiv.
-Functia drawTable deseneaza tabla de joc cu - si | si apeleaza functia updateTable pentru a desena numerele din celule.
+I chose to create a simple and cute menu where you can navigate using the arrow keys and select the desired option by pressing Enter. The mascot is the main attraction of the menu and greets you with a welcome message. If you choose the “New Game” option, the game will start, and you can begin playing. If you choose the “Resume” option, the game will load, and you can continue playing from where you left off. If you choose the “Load” option, the game will load the last saved game, and you can continue playing from where you left off. If you choose the “Quit” option, the game will close, and you will return to the terminal.
+For this requirement, I used the drawBuddy function to draw the mascot, mainScreen to draw the main screen, and select to move the asterisk based on the selected option.
 
---cerinta 3--
-Pentru aceasta cerinta am folosit functiile moveUp, moveDown, moveLeft si moveRight care muta celulele in sus, jos,
-stanga si dreapta. Am ales sa fac o functie pentru fiecare directie pentru a face codul mai usor de inteles si de
-modificat. Fiecare functie muta celulele in directia dorita si verifica daca acestea coincid pentru a le aduna.
-Daca celula nu e libera, functia cauta celule asemenea cu ea pe rand sau coloana pentru a le imbina.
-Am verificat dupa fiecare mutare daca jocul s-a terminat sau nu, si daca s-a terminat am afisat un mesaj de Game Over.
+–Requirement 2–
 
---cerinta 4--
-Functiile returnTheBestMove si numberOfNullCells se ocupa de capacitatea jocului de a se juca singur si de a alege
-cea mai buna mutare care sa elibereze cele mai multe spatii. 
+I drew the game board using the drawTable and updateTable functions.
+The updateTable function updates the game board with the numbers from the table matrix and also changes the font color based on the number in the cell. I chose to use different colors for each number to make the game more attractive. The drawTable function draws the game board with - and | and calls the updateTable function to draw the numbers in the cells.
 
---cerinta 5--
-Am verificat in functia moveCells dupa fiecare mutare daca jocul s-a terminat sau nu, si daca s-a terminat am afisat 
-un mesaj de Game Over.
+–Requirement 3–
 
+For this requirement, I used the moveUp, moveDown, moveLeft, and moveRight functions to move the cells up, down, left, and right. I chose to create a function for each direction to make the code easier to understand and modify. Each function moves the cells in the desired direction and checks if they match to combine them. If the cell is not empty, the function searches for similar cells on the row or column to merge them.
+After each move, I checked if the game was over or not, and if it was, I displayed a “Game Over” message.
 
-Fiecare functie e explicata pe indelete in 2048.c. Am pus foarte mult accent pe designul jocului si am vrut sa fie
-cat mai frumos cu putinta.
-Unele din cele mai interesante features ale jocului meu
-sunt: mascota care vorbeste cu tine si iti ofera indicatii cu privire la comenzile jocului, posibilitatea de
-a da continua jocul chiar daca inchizi programul, autosalvarea jocului la oprirea programului,
-si estetica jocului in sine.
+–Requirement 4–
 
-Functiile care muta celulele si algoritmul de mutare a celulelor a fost cel mai dificil de implementat
-si am ales o abordare cat mai simplista cu putinta, cautand cate o solutie pentru fiecare celula.
-Daca aceasta e libera (0) caut alte celule sub ea pentru cazul (W) pe care sa le mut in locul ei,
-si verific si daca acestea coincid pentru a le aduna. Daca o celula nu e libera, caut celulele asemenea
-cu ea de pe rand sau coloana pentru a le imbina.
+The returnTheBestMove and numberOfNullCells functions handle the game’s ability to play by itself and choose the best move to free up the most spaces.
 
-O alta functionalitate interesanta a jocului meu este posisiblitatea de a relua un joc (Load) chiar daca inchizi aplicatia.
-Jocul salveaza automat un joc care este in desfasurare cand inchizi programul cu Quit din meniu, iar cand deschizi
-jocul din nou te poti bucura de jocul ramas fara intrerupere.
+–Requirement 5–
+
+In the moveCells function, I checked after each move if the game was over or not, and if it was, I displayed a “Game Over” message.
+
+Each function is thoroughly explained in 2048.c. I put a lot of emphasis on the game’s design and wanted it to be as beautiful as possible.
+Some of the most interesting features of my game are: the mascot that talks to you and provides hints about the game commands, the ability to continue the game even if you close the program, the autosave feature when quitting the program, and the overall aesthetics of the game.
+
+The functions that move the cells and the cell movement algorithm were the most difficult to implement, and I chose an approach that was as simplistic as possible, finding a solution for each cell. If the cell is empty (0), I look for other cells below it in the case of (W) to move into its place, and I also check if they match to combine them. If a cell is not empty, I search for similar cells on the row or column to merge them.
+
+Another interesting functionality of my game is the ability to resume a game (Load) even if you close the application. The game automatically saves the current game when you quit using the Quit option in the menu, and when you open the game again, you can enjoy the uninterrupted game from where you left off.
